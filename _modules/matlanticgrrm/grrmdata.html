@@ -77,22 +77,29 @@
 
 <div class="viewcode-block" id="GrrmData"><a class="viewcode-back" href="../../src/modules/grrmdata.html#matlanticgrrm.grrmdata.GrrmData">[ドキュメント]</a><span class="k">class</span> <span class="nc">GrrmData</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;GRRMのデータをまとめたクラス</span>
-<span class="sd">     </span>
+<span class="sd">    </span>
 <span class="sd">    Parameters:</span>
-<span class="sd">     </span>
-<span class="sd">    eqlog: str or pathlib.Path</span>
+<span class="sd">    </span>
+<span class="sd">    eqlog: str or path object</span>
 <span class="sd">        \*_EQ_list.logのパス.</span>
-<span class="sd">    tslog: str or pathlib.Path</span>
+<span class="sd">    tslog: str or path object</span>
 <span class="sd">        \*_TS_list.logのパス.</span>
-<span class="sd">    ptlog: str or pathlib.Path</span>
+<span class="sd">    ptlog: str or path object</span>
 <span class="sd">        \*_PT_list.logのパス.</span>
-<span class="sd">    comfile: str or pathlib.Path</span>
-<span class="sd">        \*comパス.FrozenAtomsがある場合に使用する.</span>
-<span class="sd">    poscar: str or pathlib.Path</span>
-<span class="sd">        POSCARまたはCONTCARのパス. 周期境界条件にする際に使用.</span>
+<span class="sd">    comfile: str or path object</span>
+<span class="sd">        comパス.FrozenAtomsがある場合に使用する.</span>
+<span class="sd">    poscar: str or path object</span>
+<span class="sd">        poscarのパス,周期境界条件にする際に使用.</span>
 <span class="sd">    constraint: bool</span>
-<span class="sd">        Trueの場合,FrozenAtomsが固定される.FixAtomsに設定される. </span>
-<span class="sd">        </span>
+<span class="sd">        Trueの場合,FrozenAtomsが固定される.FixAtomsに設定される.</span>
+<span class="sd">            </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        eq: class</span>
+<span class="sd">            :class:`EQ` クラス</span>
+<span class="sd">        ts: class</span>
+<span class="sd">            :class:`TS` クラス</span>
+<span class="sd">        pt: class</span>
+<span class="sd">            :class:`PT` クラス        </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">eqlog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">tslog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ptlog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">comfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">poscar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">constraints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eq</span> <span class="o">=</span> <span class="n">EQ</span><span class="p">(</span><span class="n">eqlog</span><span class="p">,</span><span class="n">comfile</span><span class="p">,</span><span class="n">poscar</span><span class="p">,</span><span class="n">constraints</span><span class="p">)</span>
@@ -124,8 +131,7 @@
         <span class="k">return</span> <span class="bp">self</span> <span class="o">+</span> <span class="n">other</span></div>
     
 <span class="k">class</span> <span class="nc">_EqTsPt</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;EQとTSPTクラスの親クラス.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;EQとTSPTクラスの親クラス.&quot;&quot;&quot;</span>
     <span class="n">eqtspt</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#&quot;EQ&quot;or&quot;TS&quot;or&quot;PT&quot;が入る(子クラスでは)</span>
     
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">,</span><span class="bp">cls</span><span class="p">):</span>
@@ -157,7 +163,6 @@
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">logtext</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">is_EQ_TS_PT</span><span class="p">(</span><span class="n">logtext</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqtspt</span><span class="p">:</span><span class="c1">#EQ,PT,TSファイルである事を確認</span>
-                
                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">move_chemical_symbols</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">move_positions</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">frozen_chemical_symbols</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">frozen_positions</span><span class="p">)</span> <span class="o">=</span> <span class="n">read_log</span><span class="p">(</span><span class="n">logtext</span><span class="p">,</span><span class="n">comfile</span><span class="p">,</span><span class="n">poscar</span><span class="p">,</span><span class="n">constraints</span><span class="p">)</span>
@@ -173,8 +178,7 @@
         <span class="k">return</span> <span class="bp">self</span> <span class="o">+</span> <span class="n">other</span></div>
         
 <span class="k">class</span> <span class="nc">_TSPT</span><span class="p">(</span><span class="n">_EqTsPt</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;TS,PTの親クラス.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;TS,PTの親クラス.&quot;&quot;&quot;</span>
     <span class="n">eqtspt</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">logfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">comfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">poscar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">constraints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">logfile</span><span class="p">:</span>
@@ -193,14 +197,10 @@
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
 <span class="sd">     </span>
-<span class="sd">    logfile: str or pathlib.Path</span>
-<span class="sd">        \*TS_list.logファイルパス</span>
-<span class="sd">    comfile: str or pathlib.Path</span>
-<span class="sd">        \*comファイルパス</span>
-<span class="sd">    poscar: str or pathlib.Path</span>
-<span class="sd">        POSCARまたはCONTCARファイルパス. 周期境界条件(pbc=True)にする場合に設定</span>
 <span class="sd">    constraints: bool</span>
-<span class="sd">        FrozenAtomsをConstraintsに設定する場合True   </span>
+<span class="sd">        FrozenAtomsをConstraintsに設定する場合True</span>
+<span class="sd">        </span>
+<span class="sd">    その他のプロパティは :class:`EQ` クラス を参照</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">eqtspt</span> <span class="o">=</span> <span class="s2">&quot;TS&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">logfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">comfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">poscar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">constraints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -217,14 +217,10 @@
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
 <span class="sd">     </span>
-<span class="sd">    logfile: str or pathlib.Path</span>
-<span class="sd">        \*PT_list.logファイルパス</span>
-<span class="sd">    comfile: str or pathlib.Path</span>
-<span class="sd">        \*comファイルパス</span>
-<span class="sd">    poscar: str or pathlib.Path</span>
-<span class="sd">        POSCARまたはCONTCARファイルパス. 周期境界条件(pbc=True)にする場合に設定</span>
 <span class="sd">    constraints: bool</span>
-<span class="sd">        FrozenAtomsをConstraintsに設定する場合True   </span>
+<span class="sd">        FrozenAtomsをConstraintsに設定する場合True</span>
+<span class="sd">        </span>
+<span class="sd">    その他のプロパティは :class:`EQ` クラス を参照</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">eqtspt</span> <span class="o">=</span> <span class="s2">&quot;PT&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">logfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">comfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">poscar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">constraints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -240,15 +236,15 @@
     <span class="sd">&quot;&quot;&quot;GRRMのlogファイルを読み込んでase.Atomsのリストを返す</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
-<span class="sd">     </span>
-<span class="sd">    logfile: str or pathlib.Path</span>
-<span class="sd">        \*PT_list.logファイルパス</span>
-<span class="sd">    comfile: str or pathlib.Path</span>
-<span class="sd">        \*comファイルパス</span>
-<span class="sd">    poscar: str or pathlib.Path</span>
-<span class="sd">        POSCARまたはCONTCARファイルパス. 周期境界条件(pbc=True)にする場合に設定</span>
-<span class="sd">    constraints: bool</span>
-<span class="sd">        FrozenAtomsをConstraintsに設定する場合True</span>
+<span class="sd">    </span>
+<span class="sd">    logfile: str or path object</span>
+<span class="sd">        \*_list.logファイル</span>
+<span class="sd">    comfile: strr or path object</span>
+<span class="sd">        comファイル.FrozenAtomsがある場合に設定.</span>
+<span class="sd">    poscar: strr or path object</span>
+<span class="sd">        周期境界条件にする場合(pbc=True)の場合に設定.</span>
+<span class="sd">    constraint: bool</span>
+<span class="sd">        Trueの場合,FrozenAtomsがase.FixAtomsに設定される.</span>
 <span class="sd">        </span>
 <span class="sd">    Return:</span>
 <span class="sd">        list: ase.Atomsを要素とするリスト.</span>
@@ -260,8 +256,7 @@
         <span class="k">return</span> <span class="n">atoms</span></div>
         
 <span class="k">def</span> <span class="nf">is_EQ_TS_PT</span><span class="p">(</span><span class="n">ini_text</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;logファイルの1行目の文字からEQ,TS,PTのどのファイルかを返す</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;logファイルの1行目の文字からEQ,TS,PTのどのファイルかを返す&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">ini_text</span> <span class="o">==</span> <span class="s2">&quot;List of Equilibrium Structures</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;EQ&quot;</span>
     <span class="k">elif</span> <span class="n">ini_text</span> <span class="o">==</span> <span class="s2">&quot;List of Transition Structures</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">:</span>
@@ -272,8 +267,7 @@
         <span class="k">raise</span> <span class="n">MatranticGrrmError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;*_list.logファイルを認識できません.&#39;</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">read_log</span><span class="p">(</span><span class="n">logtext</span><span class="p">,</span><span class="n">comfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">poscar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">constraints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;*_list.logファイルのテキストからase.Atomsのリストと(GRRMで計算された)エネルギーを返す</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;\*_list.logファイルのテキストからase.Atomsのリストと(GRRMで計算された)エネルギーを返す&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">int2float</span><span class="p">(</span><span class="n">positions</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[[</span><span class="nb">float</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span> <span class="k">for</span> <span class="n">xyz</span> <span class="ow">in</span> <span class="n">atom</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]]</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">]</span>
     
@@ -315,31 +309,47 @@
     <span class="k">return</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">energies</span><span class="p">,</span><span class="n">move_symbols</span><span class="p">,</span><span class="n">move_positions_list</span><span class="p">,</span><span class="n">frozen_symbol</span><span class="p">,</span><span class="n">frozen_position</span>
 
 <span class="k">def</span> <span class="nf">read_connection</span><span class="p">(</span><span class="n">log_text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;\*_list.logファイルからCONNECTIONを読み取る&quot;&quot;&quot;</span>
     <span class="n">connections</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">int</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span> <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">isdecimal</span><span class="p">()</span> <span class="k">else</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">2</span><span class="p">],</span>
          <span class="nb">int</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">])</span> <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">isdecimal</span><span class="p">()</span> <span class="k">else</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">])</span>
          <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">log_text</span>
          <span class="k">if</span> <span class="s2">&quot;CONNECTION&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">connections</span>
 
-<div class="viewcode-block" id="atoms2log"><a class="viewcode-back" href="../../src/modules/grrmdata.html#matlanticgrrm.grrmdata.atoms2log">[ドキュメント]</a><span class="k">def</span> <span class="nf">atoms2log</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ini_list</span><span class="p">,</span><span class="n">ts_list</span><span class="p">,</span><span class="n">fin_list</span><span class="p">,</span><span class="n">com</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">calc_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;GRRMの*list.logのようなファイルを作成する</span>
+<div class="viewcode-block" id="get_connections"><a class="viewcode-back" href="../../src/modules/grrmdata.html#matlanticgrrm.grrmdata.get_connections">[ドキュメント]</a><span class="k">def</span> <span class="nf">get_connections</span><span class="p">(</span><span class="n">logfile</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;GRRMのlogファイルを読み込んでCONNECTIONSを返す</span>
 <span class="sd">    </span>
-<span class="sd">    ase.Atomsのリストを読みとり,*EQ_list.logファイルと*TS_list.logファイルを作成する</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    </span>
+<span class="sd">    logfile: str or path object</span>
+<span class="sd">        (TS or PT)_list.logファイル</span>
+<span class="sd">        </span>
+<span class="sd">    Return: list of tuple of int</span>
+<span class="sd">        CONNECTIONSのリスト</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">read_connection</span><span class="p">(</span><span class="n">l</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="atoms2log"><a class="viewcode-back" href="../../src/modules/grrmdata.html#matlanticgrrm.grrmdata.atoms2log">[ドキュメント]</a><span class="k">def</span> <span class="nf">atoms2log</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ini_list</span><span class="p">,</span><span class="n">ts_list</span><span class="p">,</span><span class="n">fin_list</span><span class="p">,</span><span class="n">com</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">calc_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;GRRMの\*list.logのようなファイルを作成する</span>
+<span class="sd">    </span>
+<span class="sd">    ase.Atomsのリストを読みとり,\*EQ_list.logファイルと\*TS_list.logファイルを作成する</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
 <span class="sd">    </span>
 <span class="sd">    name: str</span>
 <span class="sd">        {name}_EQ_list.logの形でファイルを作成する.</span>
-<span class="sd">    ini_list: list of ase.Atoms</span>
-<span class="sd">        初期構造のase.Atomsのリスト.最適化に失敗しているものは要素をNoneにする</span>
-<span class="sd">    ts_list: list of ase.Atoms</span>
-<span class="sd">        TS構造のase.Atomsのリスト.TS計算がうまくいかなかったものは要素をNone</span>
-<span class="sd">    fin_lisr: list of ase.Atoms</span>
+<span class="sd">    ini_list: list of Atoms</span>
+<span class="sd">        初期構造のase.Atomsのリスト,要素の中にNoneが含まれている場合</span>
+<span class="sd">    ts_list: list of Atoms</span>
+<span class="sd">        TS構造のase.Atomsのリスト,TS計算がうまくいかなかったものは要素をNone</span>
+<span class="sd">    fin_list: list of Atoms</span>
 <span class="sd">        終構造のase.Atomsのリスト</span>
-<span class="sd">    calc_func: function obj</span>
-<span class="sd">        calculatorを設定していない場合はcalculatorを返す関数を設定する</span>
 <span class="sd">    com: bool</span>
-<span class="sd">        Trueにすると,comファイルを作成する</span>
+<span class="sd">        Trueにすると,comファイルを作成する. constraintsに設定している部分がFixAtomsになる</span>
+<span class="sd">    calc_func: functions</span>
+<span class="sd">        calculatorを設定していない場合はcalculatorを返す関数を設定する   </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">calc_func</span><span class="p">:</span>
         <span class="n">ma</span><span class="o">.</span><span class="n">set_calculator</span><span class="p">(</span><span class="n">ini_list</span><span class="p">,</span><span class="n">calc_func</span><span class="p">)</span>

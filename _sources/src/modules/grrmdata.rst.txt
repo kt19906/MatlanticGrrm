@@ -7,18 +7,6 @@ GrrmData クラス
 ===============
 .. autoclass:: matlanticgrrm.grrmdata.GrrmData
 
-    .. autoattribute:: matlanticgrrm.grrmdata.GrrmData.eq
-
-        :class:`EQ` クラス
-    .. autoattribute:: matlanticgrrm.grrmdata.GrrmData.ts
-
-        :class:`TS` クラス
-
-    .. autoattribute:: matlanticgrrm.grrmdata.GrrmData.pt
-
-        :class:`PT` クラス  
-
-
 log2atoms()
 ===============
 .. autoclass:: matlanticgrrm.grrmdata.log2atoms
@@ -26,6 +14,10 @@ log2atoms()
 atoms2log()
 ===============
 .. autoclass:: matlanticgrrm.grrmdata.atoms2log
+
+get_connections()
+===================
+.. autoclass:: matlanticgrrm.grrmdata.get_connections
 
 
 EQ クラス

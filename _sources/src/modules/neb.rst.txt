@@ -2,9 +2,10 @@
 NEB
 ###########################
 
-
-
 .. module:: matlanticgrrm.neb
+.. module:: matlanticgrrm.grrmdata
+
+:doc:`modules/grrmdata.get_connections`
 
 ListNEB クラス
 ===============
@@ -12,10 +13,18 @@ ListNEB クラス
 
     その他の引数は :ase:`ase.neb.NEB <neb.html#ase.neb.NEB>` を参照
 
+make_images()
+===============
+.. autoclass:: matlanticgrrm.neb.make_images
+
+    ListNEBまで作成するには :func:`nebmake` を使用する 
+
 nebmake()
-=============
+==============
 .. autoclass:: matlanticgrrm.neb.nebmake
 
-neb_graph()
+    内部的には :func:`nebmake` と :class:`ListNEB` のインスタンス化を行なっている
+
+neb_graphs()
 ===============
-.. autoclass:: matlanticgrrm.neb.neb_graph
+.. autoclass:: matlanticgrrm.neb.neb_graphs

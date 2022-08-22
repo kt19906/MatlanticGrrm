@@ -1,0 +1,62 @@
+###########################
+その他
+###########################
+
+このライブラリがブラックボックス化しないようにいくつかのクラス,関数などを解説する
+
+pfp_calculatorについて
+-------------------------
+
+| pfp_calculatorはAtomsオブジェクトにcalculatorを設定する際に用いる.
+| 使用方法は次の通り
+
+.. code-block:: python
+    :emphasize-lines: 4
+
+    from ase.build import molecule
+    from matlanticgrrm.atomslist import pfp_calculator
+    atoms = molecule('H2O')
+    atoms.calc = pfp_calculator()
+
+pfp_calculatorのソースコードは次の通り
+
+.. code-block:: python
+
+    from pfp_api_client.pfp.calculators.ase_calculator import ASECalculator
+    from pfp_api_client.pfp.estimator import Estimator, EstimatorCalcMode
+
+    def pfp_calculator():
+        estimator = Estimator(calc_mode=EstimatorCalcMode.CRYSTAL_PLUS_D3)
+        calc = ASECalculator(estimator)
+        return calc
+
+| これでAtomsオブジェクトにcalculatorを設定できる理由は一目瞭然である.
+| DFT-D3を使用していることもわかる.
+
+
+set_calculatorについて
+------------------------
+
+set_calculatorはAtomsリストの全ての要素にcalculatorを設定する関数である.
+
+.. code-block:: python
+   :emphasize-lines: 4
+
+    from matlanticgrrm.atomslist import pfp_calculator,set_calculator
+    from matlanticgrrm.grrmdata import log2atoms
+    atoms_list = log2atoms('*_EQ_list.log')
+    set_calculator(atoms_list, pfp_calculator)
+
+| 第二引数はpfp_calculator()のように()を付けない事に気を付ける
+| ソースコードは以下の通り
+
+.. code-block:: python
+
+    def set_calculator(atoms_list,func):
+        for atoms in atoms_list:
+            if atoms:
+                atoms.calc = func()
+
+| 単純にfor文で各要素にcalculatorを設定している. 
+  atoms_listの要素にはNoneを含んでる可能性があるのでif文用いる.
+| pfp_calculatorに()を付けて関数をコールしてはいけない理由が分かる.

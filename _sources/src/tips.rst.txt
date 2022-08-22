@@ -1,6 +1,6 @@
-###########################
+############################
 Tips
-###########################
+############################
 .. module:: matlanticgrrm.atomslist
 .. module:: matlanticgrrm.optimize
 

@@ -43,6 +43,7 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">クイックスタート</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#id2">構造最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#neb">NEB</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
@@ -132,6 +133,41 @@
 <span class="n">write</span><span class="p">(</span><span class="s2">&quot;EQ.traj&quot;</span><span class="p">,</span><span class="n">atoms</span><span class="p">)</span>
 <span class="c1"># --&gt; EQ.trajが作成される</span>
 </pre></div>
+</div>
+</section>
+<section id="neb">
+<h2>NEB<a class="headerlink" href="#neb" title="この見出しへのパーマリンク"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matlanticgrrm.atomslist</span> <span class="kn">import</span> <span class="n">set_calculator</span><span class="p">,</span> <span class="n">pfp_calculator</span>
+<span class="kn">from</span> <span class="nn">matlanticgrrm.optimize</span> <span class="kn">import</span> <span class="n">ListLFIRE</span>
+<span class="kn">from</span> <span class="nn">matlanticgrrm.neb</span> <span class="kn">import</span> <span class="n">ListLNEB</span>
+<span class="kn">from</span> <span class="nn">matlanticgrrm.grrmdata</span> <span class="kn">import</span> <span class="n">get_connections</span>
+<span class="kn">from</span> <span class="nn">matlanticgrrm.io</span> <span class="kn">import</span> <span class="n">lread</span>
+
+<span class="n">eq_list</span> <span class="o">=</span> <span class="n">lread</span><span class="p">(</span><span class="s2">&quot;*traj&quot;</span><span class="p">,</span><span class="s2">&quot;*pickle&quot;</span><span class="p">)</span> <span class="c1"># 構造最適化で作成されたtraj,pickleファイル</span>
+<span class="n">connections</span> <span class="o">=</span> <span class="n">get_connections</span><span class="p">(</span><span class="s2">&quot;*_TS_list.log&quot;</span><span class="p">)</span>
+
+<span class="n">imagess</span> <span class="o">=</span> <span class="n">make_images</span><span class="p">(</span><span class="n">eq_list</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span> <span class="c1"># imagesのリスト(Atomsの2Dリスト)を作成</span>
+
+<span class="k">for</span> <span class="n">images</span> <span class="ow">in</span> <span class="n">imagess</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;imagessにcalculatorを取り付ける(時間がかかる)&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">images</span><span class="p">:</span>
+        <span class="n">set_calculator</span><span class="p">(</span><span class="n">images</span><span class="p">,</span><span class="n">pfp_calculator</span><span class="p">)</span>
+
+<span class="n">neb_list</span> <span class="o">=</span> <span class="n">ListNEB</span><span class="p">(</span><span class="n">imagess</span><span class="p">,</span><span class="n">climb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># imagesをListNEBに渡す</span>
+
+<span class="n">opt</span> <span class="o">=</span> <span class="n">ListFIRE</span><span class="p">(</span><span class="n">neb_list</span><span class="p">,</span> <span class="s2">&quot;NEB_list&quot;</span><span class="p">,</span> <span class="n">logfolder</span><span class="o">=</span><span class="s2">&quot;Log&quot;</span><span class="p">,</span> <span class="n">errorlog</span><span class="o">=</span><span class="s2">&quot;error.log&quot;</span><span class="p">)</span>
+<span class="n">opt</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">fmax</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span> <span class="c1"># 計算実行</span>
+<span class="c1"># --&gt; Log/0.log, Log/1.log, Log/2.log ... にログが書き込まれる</span>
+<span class="c1"># --&gt; NEB_list.traj, NEB_list.pickle, error.logが作成される</span>
+
+<span class="sd">&quot;&quot;&quot;&quot;結果の表示(エネルギーダイアグラム), TS構造を保存&quot;&quot;&quot;</span><span class="s2">&quot;</span>
+<span class="n">neb_graphs</span><span class="p">(</span><span class="n">imagess</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="s2">&quot;neb_graph.html&quot;</span><span class="p">,</span><span class="n">traj</span><span class="o">=</span><span class="s2">&quot;neb_ts.traj&quot;</span><span class="p">)</span>
+<span class="c1"># --&gt; neb_graph.html, neb_ts.trajが作成される</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">neb_graphsでエネルギーダイアグラム図はneb_graph.htmlに保存される.</div>
+<div class="line">自動でTSの位置を取得しneb_ts.trajに保存される.</div>
 </div>
 </section>
 </section>

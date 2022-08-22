@@ -51,6 +51,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#grrmdata">GrrmData クラス</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#log2atoms">log2atoms()</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#atoms2log">atoms2log()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-connections">get_connections()</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#eq">EQ クラス</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ts">TS クラス</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pt">PT クラス</a></li>
@@ -123,15 +124,15 @@
 <dd><p>GRRMのデータをまとめたクラス</p>
 <p>Parameters:</p>
 <dl class="simple">
-<dt>eqlog: str or pathlib.Path</dt><dd><p>*_EQ_list.logのパス.</p>
+<dt>eqlog: str or path object</dt><dd><p>*_EQ_list.logのパス.</p>
 </dd>
-<dt>tslog: str or pathlib.Path</dt><dd><p>*_TS_list.logのパス.</p>
+<dt>tslog: str or path object</dt><dd><p>*_TS_list.logのパス.</p>
 </dd>
-<dt>ptlog: str or pathlib.Path</dt><dd><p>*_PT_list.logのパス.</p>
+<dt>ptlog: str or path object</dt><dd><p>*_PT_list.logのパス.</p>
 </dd>
-<dt>comfile: str or pathlib.Path</dt><dd><p>*comパス.FrozenAtomsがある場合に使用する.</p>
+<dt>comfile: str or path object</dt><dd><p>comパス.FrozenAtomsがある場合に使用する.</p>
 </dd>
-<dt>poscar: str or pathlib.Path</dt><dd><p>POSCARまたはCONTCARのパス. 周期境界条件にする際に使用.</p>
+<dt>poscar: str or path object</dt><dd><p>poscarのパス,周期境界条件にする際に使用.</p>
 </dd>
 <dt>constraint: bool</dt><dd><p>Trueの場合,FrozenAtomsが固定される.FixAtomsに設定される.</p>
 </dd>
@@ -139,19 +140,22 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="matlanticgrrm.grrmdata.GrrmData.eq">
 <span class="sig-name descname"><span class="pre">eq</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.GrrmData.eq" title="この定義へのパーマリンク"></a></dt>
-<dd><p><a class="reference internal" href="#matlanticgrrm.grrmdata.EQ" title="matlanticgrrm.grrmdata.EQ"><code class="xref py py-class docutils literal notranslate"><span class="pre">EQ</span></code></a> クラス</p>
+<dd><p>class
+<a class="reference internal" href="#matlanticgrrm.grrmdata.EQ" title="matlanticgrrm.grrmdata.EQ"><code class="xref py py-class docutils literal notranslate"><span class="pre">EQ</span></code></a> クラス</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="matlanticgrrm.grrmdata.GrrmData.ts">
 <span class="sig-name descname"><span class="pre">ts</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.GrrmData.ts" title="この定義へのパーマリンク"></a></dt>
-<dd><p><a class="reference internal" href="#matlanticgrrm.grrmdata.TS" title="matlanticgrrm.grrmdata.TS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TS</span></code></a> クラス</p>
+<dd><p>class
+<a class="reference internal" href="#matlanticgrrm.grrmdata.TS" title="matlanticgrrm.grrmdata.TS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TS</span></code></a> クラス</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="matlanticgrrm.grrmdata.GrrmData.pt">
 <span class="sig-name descname"><span class="pre">pt</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.GrrmData.pt" title="この定義へのパーマリンク"></a></dt>
-<dd><p><a class="reference internal" href="#matlanticgrrm.grrmdata.PT" title="matlanticgrrm.grrmdata.PT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PT</span></code></a> クラス</p>
+<dd><p>class
+<a class="reference internal" href="#matlanticgrrm.grrmdata.PT" title="matlanticgrrm.grrmdata.PT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PT</span></code></a> クラス</p>
 </dd></dl>
 
 </dd></dl>
@@ -165,13 +169,13 @@
 <dd><p>GRRMのlogファイルを読み込んでase.Atomsのリストを返す</p>
 <p>Parameters:</p>
 <dl class="simple">
-<dt>logfile: str or pathlib.Path</dt><dd><p>*PT_list.logファイルパス</p>
+<dt>logfile: str or path object</dt><dd><p>*_list.logファイル</p>
 </dd>
-<dt>comfile: str or pathlib.Path</dt><dd><p>*comファイルパス</p>
+<dt>comfile: strr or path object</dt><dd><p>comファイル.FrozenAtomsがある場合に設定.</p>
 </dd>
-<dt>poscar: str or pathlib.Path</dt><dd><p>POSCARまたはCONTCARファイルパス. 周期境界条件(pbc=True)にする場合に設定</p>
+<dt>poscar: strr or path object</dt><dd><p>周期境界条件にする場合(pbc=True)の場合に設定.</p>
 </dd>
-<dt>constraints: bool</dt><dd><p>FrozenAtomsをConstraintsに設定する場合True</p>
+<dt>constraint: bool</dt><dd><p>Trueの場合,FrozenAtomsがase.FixAtomsに設定される.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
@@ -196,15 +200,31 @@
 <dl class="simple">
 <dt>name: str</dt><dd><p>{name}_EQ_list.logの形でファイルを作成する.</p>
 </dd>
-<dt>ini_list: list of ase.Atoms</dt><dd><p>初期構造のase.Atomsのリスト.最適化に失敗しているものは要素をNoneにする</p>
+<dt>ini_list: list of Atoms</dt><dd><p>初期構造のase.Atomsのリスト,要素の中にNoneが含まれている場合</p>
 </dd>
-<dt>ts_list: list of ase.Atoms</dt><dd><p>TS構造のase.Atomsのリスト.TS計算がうまくいかなかったものは要素をNone</p>
+<dt>ts_list: list of Atoms</dt><dd><p>TS構造のase.Atomsのリスト,TS計算がうまくいかなかったものは要素をNone</p>
 </dd>
-<dt>fin_lisr: list of ase.Atoms</dt><dd><p>終構造のase.Atomsのリスト</p>
+<dt>fin_list: list of Atoms</dt><dd><p>終構造のase.Atomsのリスト</p>
 </dd>
-<dt>calc_func: function obj</dt><dd><p>calculatorを設定していない場合はcalculatorを返す関数を設定する</p>
+<dt>com: bool</dt><dd><p>Trueにすると,comファイルを作成する. constraintsに設定している部分がFixAtomsになる</p>
 </dd>
-<dt>com: bool</dt><dd><p>Trueにすると,comファイルを作成する</p>
+<dt>calc_func: functions</dt><dd><p>calculatorを設定していない場合はcalculatorを返す関数を設定する</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="get-connections">
+<h2>get_connections()<a class="headerlink" href="#get-connections" title="この見出しへのパーマリンク"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.get_connections">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.grrmdata.</span></span><span class="sig-name descname"><span class="pre">get_connections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logfile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/grrmdata.html#get_connections"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.grrmdata.get_connections" title="この定義へのパーマリンク"></a></dt>
+<dd><p>GRRMのlogファイルを読み込んでCONNECTIONSを返す</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>logfile: str or path object</dt><dd><p>(TS or PT)_list.logファイル</p>
+</dd>
+<dt>Return: list of tuple of int</dt><dd><p>CONNECTIONSのリスト</p>
 </dd>
 </dl>
 </dd></dl>
@@ -274,15 +294,10 @@
 <dd><p>TSの情報をまとめたクラス.</p>
 <p>Parameters:</p>
 <dl class="simple">
-<dt>logfile: str or pathlib.Path</dt><dd><p>*TS_list.logファイルパス</p>
-</dd>
-<dt>comfile: str or pathlib.Path</dt><dd><p>*comファイルパス</p>
-</dd>
-<dt>poscar: str or pathlib.Path</dt><dd><p>POSCARまたはCONTCARファイルパス. 周期境界条件(pbc=True)にする場合に設定</p>
-</dd>
 <dt>constraints: bool</dt><dd><p>FrozenAtomsをConstraintsに設定する場合True</p>
 </dd>
 </dl>
+<p>その他のプロパティは <a class="reference internal" href="#matlanticgrrm.grrmdata.EQ" title="matlanticgrrm.grrmdata.EQ"><code class="xref py py-class docutils literal notranslate"><span class="pre">EQ</span></code></a> クラス を参照</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="matlanticgrrm.grrmdata.TS.atoms">
 <span class="sig-name descname"><span class="pre">atoms</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.TS.atoms" title="この定義へのパーマリンク"></a></dt>
@@ -336,15 +351,10 @@
 <dd><p>PTの情報をまとめたクラス.</p>
 <p>Parameters:</p>
 <dl class="simple">
-<dt>logfile: str or pathlib.Path</dt><dd><p>*PT_list.logファイルパス</p>
-</dd>
-<dt>comfile: str or pathlib.Path</dt><dd><p>*comファイルパス</p>
-</dd>
-<dt>poscar: str or pathlib.Path</dt><dd><p>POSCARまたはCONTCARファイルパス. 周期境界条件(pbc=True)にする場合に設定</p>
-</dd>
 <dt>constraints: bool</dt><dd><p>FrozenAtomsをConstraintsに設定する場合True</p>
 </dd>
 </dl>
+<p>その他のプロパティは <a class="reference internal" href="#matlanticgrrm.grrmdata.EQ" title="matlanticgrrm.grrmdata.EQ"><code class="xref py py-class docutils literal notranslate"><span class="pre">EQ</span></code></a> クラス を参照</p>
 <p><a class="reference internal" href="#matlanticgrrm.grrmdata.TS" title="matlanticgrrm.grrmdata.TS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TS</span></code></a> クラスと同じPoperty</p>
 </dd></dl>
 

@@ -11,7 +11,9 @@ MatlanticGrrm's documentation
 
    src/quick_start
    src/modules
+   src/tutorial
    src/tips
+   src/other
 
 Indices and tables
 ==================

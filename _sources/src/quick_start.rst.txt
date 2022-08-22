@@ -36,3 +36,38 @@
 
     write("EQ.traj",atoms)
     # --> EQ.trajが作成される
+
+NEB
+===============
+
+.. code-block:: python
+
+    from matlanticgrrm.atomslist import set_calculator, pfp_calculator
+    from matlanticgrrm.optimize import ListLFIRE
+    from matlanticgrrm.neb import ListLNEB
+    from matlanticgrrm.grrmdata import get_connections
+    from matlanticgrrm.io import lread
+
+    eq_list = lread("*traj","*pickle") # 構造最適化で作成されたtraj,pickleファイル
+    connections = get_connections("*_TS_list.log")
+
+    imagess = make_images(eq_list,connections,8) # imagesのリスト(Atomsの2Dリスト)を作成
+
+    for images in imagess:
+        """imagessにcalculatorを取り付ける(時間がかかる)"""
+        if images:
+            set_calculator(images,pfp_calculator)
+
+    neb_list = ListNEB(imagess,climb=True, parallel=False) # imagesをListNEBに渡す
+
+    opt = ListFIRE(neb_list, "NEB_list", logfolder="Log", errorlog="error.log")
+    opt.run(fmax=0.05) # 計算実行 
+    # --> Log/0.log, Log/1.log, Log/2.log ... にログが書き込まれる
+    # --> NEB_list.traj, NEB_list.pickle, error.logが作成される
+
+    """"結果の表示(エネルギーダイアグラム), TS構造を保存""""
+    neb_graphs(imagess, html="neb_graph.html",traj="neb_ts.traj")
+    # --> neb_graph.html, neb_ts.trajが作成される
+
+| neb_graphsでエネルギーダイアグラム図はneb_graph.htmlに保存される.
+| 自動でTSの位置を取得しneb_ts.trajに保存される.

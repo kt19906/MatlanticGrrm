@@ -80,7 +80,19 @@
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">find_peaks</span>
 
+<span class="kn">from</span> <span class="nn">.atomslist</span> <span class="kn">import</span> <span class="n">pfp_calculator</span>
+
 <div class="viewcode-block" id="ListNEB"><a class="viewcode-back" href="../../src/modules/neb.html#matlanticgrrm.neb.ListNEB">[ドキュメント]</a><span class="k">class</span> <span class="nc">ListNEB</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    </span>
+<span class="sd">    imagess: list of images (2D list of Atoms)</span>
+<span class="sd">        imagesのリスト(Atomsの2次元リスト)</span>
+<span class="sd">        </span>
+<span class="sd">    その他の引数は :ase:`NEB &lt;neb.html#ase.neb.NEB&gt;` を参照</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">imagess</span><span class="p">,</span><span class="n">k</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">climb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">remove_rotation_and_translation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">world</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;aseneb&#39;</span><span class="p">,</span><span class="n">allow_shared_calculator</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">precon</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">imagess</span> <span class="o">=</span> <span class="n">imagess</span>
@@ -105,10 +117,32 @@
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">neb</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>  </div>
         
-<div class="viewcode-block" id="nebmake"><a class="viewcode-back" href="../../src/modules/neb.html#matlanticgrrm.neb.nebmake">[ドキュメント]</a><span class="k">def</span> <span class="nf">nebmake</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">nimages</span><span class="p">,</span><span class="n">calc_func</span><span class="p">,</span><span class="n">ts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">same_react</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">same_connect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="s2">&quot;nebmake.log&quot;</span><span class="p">,</span>
+<div class="viewcode-block" id="nebmake"><a class="viewcode-back" href="../../src/modules/neb.html#matlanticgrrm.neb.nebmake">[ドキュメント]</a><span class="k">def</span> <span class="nf">nebmake</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">nimages</span><span class="p">,</span><span class="n">calc_func</span><span class="o">=</span><span class="n">pfp_calculator</span><span class="p">,</span><span class="n">ts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">same_react</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">same_connect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="s2">&quot;nebmake.log&quot;</span><span class="p">,</span>
             <span class="n">k</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">climb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">remove_rotation_and_translation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">world</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;aseneb&#39;</span><span class="p">,</span><span class="n">allow_shared_calculator</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">precon</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;imagessを作成し,NEBListをオブジェクトを作成する</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    </span>
+<span class="sd">    eq: list of Atoms</span>
+<span class="sd">        EQ構造のAtomsリスト</span>
+<span class="sd">    connections: list of tuples of integers</span>
+<span class="sd">        CONNECTIONSの情報のリスト,  または :class:`GrrmData` で取得できる</span>
+<span class="sd">    nimages: integer</span>
+<span class="sd">        imageの数</span>
+<span class="sd">    calc_func: function</span>
+<span class="sd">        | calculatorを返す関数</span>
+<span class="sd">        | imagesにcalculatorを設定ため</span>
+<span class="sd">    ts: list of Atoms</span>
+<span class="sd">        | TS構造のAtomsリスト, imagesの中間に挿入する</span>
+<span class="sd">        | 現在作成中で使用不可</span>
+<span class="sd">    same_react: bool</span>
+<span class="sd">        Trueにした場合,同じ反応のNEBimageも作成.</span>
+<span class="sd">    same_connect: bool</span>
+<span class="sd">        Trueにした場合,同じeqを繋ぐNEBimageも作成.</span>
+<span class="sd">    log: str or None</span>
+<span class="sd">        logのファイル名. Noneの場合ファイルを出力しない</span>
+<span class="sd">        </span>
 <span class="sd">    </span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -123,17 +157,20 @@
                   <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span><span class="n">allow_shared_calculator</span><span class="o">=</span><span class="n">allow_shared_calculator</span><span class="p">,</span><span class="n">precon</span><span class="o">=</span><span class="n">precon</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">neb</span></div>
 
-<span class="k">def</span> <span class="nf">make_images</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">nimages</span><span class="p">,</span><span class="n">ts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">same_react</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">same_connect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="s2">&quot;nebmake.log&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="make_images"><a class="viewcode-back" href="../../src/modules/neb.html#matlanticgrrm.neb.make_images">[ドキュメント]</a><span class="k">def</span> <span class="nf">make_images</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">nimages</span><span class="p">,</span><span class="n">ts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">same_react</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">same_connect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="s2">&quot;nebmake.log&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;NEBのイメージを作成する.</span>
 <span class="sd">    </span>
-<span class="sd">    Param:</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    </span>
 <span class="sd">    eq: list of Atoms</span>
 <span class="sd">        EQのAtomsリスト,計算したくないものは要素にNoneを設定しておく.</span>
 <span class="sd">    connections: list of tuple of int</span>
 <span class="sd">        CONNECTION情報.??やDCが含まれていてもOK.</span>
-<span class="sd">    nimages (int) : 作成するimageの数</span>
+<span class="sd">    nimages: integer</span>
+<span class="sd">        作成するimageの数</span>
 <span class="sd">    ts: list of Atoms</span>
-<span class="sd">        中間にts構造を挿入する場合はTSのAtomsリストを設定する.</span>
+<span class="sd">        | TS構造のAtomsリスト, imagesの中間に挿入する</span>
+<span class="sd">        | 現在作成中で使用不可</span>
 <span class="sd">    same_react: bool</span>
 <span class="sd">        Trueにした場合,同じ反応のNEBimageも作成.</span>
 <span class="sd">    same_connect: bool</span>
@@ -142,13 +179,10 @@
 <span class="sd">        logのファイル名. Noneの場合ファイルを出力しない</span>
 <span class="sd">        </span>
 <span class="sd">    Return:</span>
-<span class="sd">        ase.neb.NEB.imagesを要素とするリスト，作成しなかったimageはNone.&quot;-&quot;で標準出力</span>
+<span class="sd">        ase.neb.NEB.imagesを要素とするリスト,作成しなかったimageはNone.&quot;-&quot;で標準出力</span>
 <span class="sd">        </span>
 <span class="sd">    Note:</span>
 <span class="sd">        logファイルを出力する.</span>
-<span class="sd">        </span>
-<span class="sd">    ToDo:</span>
-<span class="sd">        TSを挿入できるようにする.forceを計算して警告できるようにする</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">imagess</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">indexes</span> <span class="o">=</span> <span class="n">make_nebmakelog</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">ts</span><span class="p">,</span><span class="n">same_react</span><span class="p">,</span><span class="n">same_connect</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
@@ -168,7 +202,7 @@
                 <span class="n">imagess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">imagess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">imagess</span>
+    <span class="k">return</span> <span class="n">imagess</span></div>
     
 <span class="k">def</span> <span class="nf">make_nebmakelog</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">ts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">same_react</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">same_connect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="s2">&quot;nebmake.log&quot;</span><span class="p">):</span>
     <span class="n">connect_copy</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1">#重複したini,finの組み合わせがないか探すため</span>
@@ -215,7 +249,22 @@
             
     <span class="k">return</span> <span class="n">indexes</span>
         
-<span class="k">def</span> <span class="nf">neb_graphs</span><span class="p">(</span><span class="n">imagess</span><span class="p">,</span><span class="n">html</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">traj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">pkl</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="neb_graphs"><a class="viewcode-back" href="../../src/modules/neb.html#matlanticgrrm.neb.neb_graphs">[ドキュメント]</a><span class="k">def</span> <span class="nf">neb_graphs</span><span class="p">(</span><span class="n">imagess</span><span class="p">,</span><span class="n">html</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">traj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">pkl</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;NEBのエネルギーダイアグラムを作成</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    </span>
+<span class="sd">    imagess: list of images (2D list of Atoms)</span>
+<span class="sd">        imagesのリスト(Atomsの2次元リスト)</span>
+<span class="sd">    html: str or path object</span>
+<span class="sd">        | htmlのパス</span>
+<span class="sd">        | htmlにグラフを作成する.Noneの場合は標準出力(非推奨).</span>
+<span class="sd">    traj: str or path object</span>
+<span class="sd">        | trajのパス</span>
+<span class="sd">        | TS構造のtrajファイルを作成する. TS構造の存在しない要素は空のAtomsオブジェクト</span>
+<span class="sd">    pkl: str or path object</span>
+<span class="sd">        TS構造のindex番号, TS構造が存在しない要素はNone</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">energiess</span> <span class="o">=</span> <span class="p">[</span><span class="n">ma</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="k">if</span> <span class="n">images</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">images</span> <span class="ow">in</span> <span class="n">imagess</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">images_e</span> <span class="ow">in</span> <span class="n">energiess</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">images_e</span><span class="p">:</span>
@@ -276,11 +325,11 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         
-    <span class="k">return</span> <span class="n">idx</span>
+    <span class="k">return</span> <span class="n">idx</span></div>
 
-<div class="viewcode-block" id="neb_graph"><a class="viewcode-back" href="../../src/modules/neb.html#matlanticgrrm.neb.neb_graph">[ドキュメント]</a><span class="k">def</span> <span class="nf">neb_graph</span><span class="p">(</span><span class="n">image</span><span class="p">,</span><span class="n">calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">neb_graph</span><span class="p">(</span><span class="n">image</span><span class="p">,</span><span class="n">calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">calculator</span><span class="p">:</span>
-        <span class="n">ma</span><span class="o">.</span><span class="n">set_calculator</span><span class="p">(</span><span class="n">calculator</span><span class="p">)</span></div>
+        <span class="n">ma</span><span class="o">.</span><span class="n">set_calculator</span><span class="p">(</span><span class="n">calculator</span><span class="p">)</span>
         
 </pre></div>
 
