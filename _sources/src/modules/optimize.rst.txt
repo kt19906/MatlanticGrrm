@@ -62,7 +62,7 @@ ListBFGS クラス
 
    引数は :class:`ListOptimizer` と :ase:`BFGS <optimize.html#ase.optimize.BFGS>` を参照
 
-ListLBFGS クラス
+ListLBFGS クラス 
 ==================
 .. autoclass:: matlanticgrrm.optimize.ListLBFGS
 
