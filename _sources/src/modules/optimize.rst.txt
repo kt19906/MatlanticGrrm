@@ -1,0 +1,93 @@
+###########################
+構造最適化
+###########################
+.. module:: matlanticgrrm.optimize
+
+| matlanticgrrmでは :class:`ListBFGS` , :class:`ListLBFGS` , :class:`ListBFGSLineSearch` , :class:`ListLBFGSLineSearch` , :class:`ListFIRE` , :class:`ListSella` のOptimizerを提供する.
+| これらはaseおよびsellaのBFGS, LBFGS, BFGSLineSearch, LBFGSLineSearch, FIRE, Sellaの第一引数にase.Atonsのリストを与えることのできるように拡張したクラスである.
+
++-----------------+------------------------------+-------------------+
+| ライブラリ      | クラス                       | 第一引数          |
++=================+==============================+===================+
+|  matlanticgrrm  | :class:`ListBFGS`            | ase.Atomsのリスト |
+|                 +------------------------------+                   |
+|                 | :class:`ListLBFGS`           |                   |
+|                 +------------------------------+                   |
+|                 | :class:`ListBFGSLineSearch`  |                   |
+|                 +------------------------------+                   |
+|                 | :class:`ListLBFGSLineSearch` |                   |
+|                 +------------------------------+                   |
+|                 | :class:`ListFIRE`            |                   |
+|                 +------------------------------+                   |
+|                 | :class:`ListSella`           |                   |
++-----------------+------------------------------+-------------------+
++-----------------+------------------------------+-------------------+
+|  ase            | ``BFGS``                     | ase.Atoms         |
+|                 +------------------------------+                   |
+|                 | ``LBFGS``                    |                   |
+|                 +------------------------------+                   |
+|                 | ``BFGSLineSearch``           |                   |
+|                 +------------------------------+                   |
+|                 | ``LBFGSLineSearch``          |                   |
+|                 +------------------------------+                   |
+|                 | ``FIRE``                     |                   |
++-----------------+------------------------------+                   |
+|  sella          | ``Sella``                    |                   |
++-----------------+------------------------------+-------------------+
+
+基本的にはASE,Sellaと同じ引数( :class:`ListBFGS` の場合, :ase:`BFGS <optimize.html#ase.optimize.BFGS>` と同じ引数)をとる事ができるが. いくつかASE,Sellaにはないmatlanticgrrm特有の引数がある.
+
+- ASE,Sellaとは少し仕様の異なる引数
+   + 第一引数:atoms_list (aseのatomsに相当)
+   + logfolder (aseのlogfileに相当)
+   + trajfolder (aseのtrajectoryに相当)
+- ASE,Sellaにはない引数
+   + errorlog
+   + indexes
+   + max_fmax
+   + timeout
+   + retry ( :class:`ListSella` )のみ
+
+これらの引数の詳細な説明は :class:`ListOptimizer` に記載する
+
+.. autoclass:: matlanticgrrm.optimize.ListOptimizer
+   :members: run
+
+.. warning:: :class:`ListOptimizer` は全てOptimizerの親クラスであり,直接インスタンス化することはない．
+
+
+ListBFGS クラス
+=================
+.. autoclass:: matlanticgrrm.optimize.ListBFGS
+
+   引数は :class:`ListOptimizer` と :ase:`BFGS <optimize.html#ase.optimize.BFGS>` を参照
+
+ListLBFGS クラス
+==================
+.. autoclass:: matlanticgrrm.optimize.ListLBFGS
+
+   引数は :class:`ListOptimizer` と :ase:`ase.optimize.LBFGS <optimize.html#ase.optimize.LBFGS>` を参照
+
+ListBFGSLineSearch クラス
+===========================
+.. autoclass:: matlanticgrrm.optimize.ListBFGSLineSearch
+
+   引数は :class:`ListOptimizer` を参照
+
+
+ListLBFGSLineSearch クラス
+==========================
+.. autoclass:: matlanticgrrm.optimize.ListLBFGSLineSearch
+
+   引数は :class:`ListOptimizer` と :ase:`ase.optimize.LBFGSLineSearch <optimize.html#ase.optimize.LBFGSLineSearch>` を参照
+
+ListFIRE クラス
+================
+.. autoclass:: matlanticgrrm.optimize.ListFIRE
+
+   引数は :class:`ListOptimizer` と :ase:`ase.optimize.FIRE <optimize.html#ase.optimize.FIRE>` を参照
+
+ListSella クラス
+================
+.. autoclass:: matlanticgrrm.optimize.ListSella
+   :members: run

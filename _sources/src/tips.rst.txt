@@ -1,0 +1,64 @@
+###########################
+Tips
+###########################
+.. module:: matlanticgrrm.atomslist
+.. module:: matlanticgrrm.optimize
+
+ase.dataモジュールについて
+---------------------------
+
+.. code-block:: python
+
+    from ase.data import atomic_numbers, atomic_names, atomic_masses, covalent_radii
+    atomic_numbers # Alの原子番号を確認するには
+    >>> 13
+    covalent_radii[13] # Alの共有結合半径
+    >>> 1.21
+
+:func:`matlanticgrrm.atomslist.grouping` などで*kwargsで共有結合半径を上書きする際にデフォルトの値を知るために使える.
+
+
+計算後のファイルからAtomsのリストを作成する
+-----------------------------------------------------------------------------------
+
+| :doc:`modules/optimize` を使用し計算を行なうと{savename}.trajと{savename}.pickleが作成される.
+| trajファイルは計算後の構造, pickleファイルには収束,未収束などの計算結果の情報が書き込まれている.
+| この2つのファイルからAtomsリストを再生する方法を示す.
+
+- atoms_list(Atomsの1次元リスト)の再生
+
+    .. code-block:: python
+
+        import pickle
+        from ase.io import iread
+
+        with open("*.pickle","rb") as f:
+            l,_ = pickle.load(f)
+
+        atoms_list = [atoms if i in [0] else None for i,atoms in zip(l,iread("*traj"))] # 収束済み以外はNoneにする
+
+    | 収束済み:0 の結果のみをインポートするため ``[0]``
+    | 例えば, 未収束:3, タイムアウト:4 のデータのみをインポートする場合は ``[3,4]`` とする
+    | 番号の詳細については :doc:`modules/log` を参照
+
+- images(Atomsの2次元リスト)の再生
+
+    .. code-block:: python
+
+        import pickle
+        from ase.io import iread
+
+        with open("*.pickle","rb") as f:
+            l,n = pickle.load(f)
+        gen = iread("*.traj")
+
+        imagess = []
+        for i in l:
+            images = []
+            for _ in range(n):
+                if i in [0]: # 収束済み以外はNoneにする
+                    images.append(next(gen))
+                else:
+                    next(gen)
+                    images = None
+            imagess.append(images)

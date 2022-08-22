@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atomsリストの操作 &mdash; MatlanticGrrm 2020/08/14 ドキュメント</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/ase.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" />
+    <link rel="next" title="GRRMのデータのインポート" href="grrmdata.html" />
+    <link rel="prev" title="振動解析" href="vibrations.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> MatlanticGrrm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">クイックスタート</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="optimize.html">構造最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="neb.html">NEB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vibrations.html">振動解析</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Atomsリストの操作</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#smiles">SMILESを利用した関数</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">その他</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grrmdata.html">GRRMのデータのインポート</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualize.html">構造の可視化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats.html">Atomsリストの保存・読み込み</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tips.html">Tips</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MatlanticGrrm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../modules.html">Modules</a> &raquo;</li>
+      <li>Atomsリストの操作</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/src/modules/atomslist.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-matlanticgrrm">
+<span id="atoms"></span><h1>Atomsリストの操作<a class="headerlink" href="#module-matlanticgrrm" title="この見出しへのパーマリンク"></a></h1>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>get_* メソッドを使用した際に発生するpfp_api_client.exception.PFPAPIErrorは,
+大抵の場合,無理な構造に対してPFP-APIがforceを計算できないために発生している.
+そのためエラーが発生した場合には一度構造を確認すると良い.</p>
+</div>
+<span class="target" id="module-matlanticgrrm.atomslist"></span><dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.copy">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#copy"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.copy" title="この定義へのパーマリンク"></a></dt>
+<dd><p>ase.Atomsのリストをコピーする</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>atoms_list: list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.del_constraints">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">del_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#del_constraints"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.del_constraints" title="この定義へのパーマリンク"></a></dt>
+<dd><p>全てのconstraintsを削除する</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.get_forces">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">get_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#get_forces"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.get_forces" title="この定義へのパーマリンク"></a></dt>
+<dd><p>各要素(構造)のforcesを出力</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.get_kinetic_energy">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">get_kinetic_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#get_kinetic_energy"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.get_kinetic_energy" title="この定義へのパーマリンク"></a></dt>
+<dd><p>各要素(構造)のkinetic_energyを出力</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.get_positions">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">get_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#get_positions"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.get_positions" title="この定義へのパーマリンク"></a></dt>
+<dd><p>各要素(構造)の座標を出力</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.get_potential_energy">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">get_potential_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#get_potential_energy"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.get_potential_energy" title="この定義へのパーマリンク"></a></dt>
+<dd><p>各要素(構造)のpotential_energyを出力</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.get_total_energy">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">get_total_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#get_total_energy"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.get_total_energy" title="この定義へのパーマリンク"></a></dt>
+<dd><p>各要素(構造)のtotal_energyを出力</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.set_calculator">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">set_calculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#set_calculator"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.set_calculator" title="この定義へのパーマリンク"></a></dt>
+<dd><p>各要素(構造)にcalculatorを設定する.</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>atoms_list: list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.</p>
+</dd>
+<dt>func:</dt><dd><p>calculatorを返す関数.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.set_cell">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">set_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#set_cell"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.set_cell" title="この定義へのパーマリンク"></a></dt>
+<dd><p>各要素(構造)にconstraint(FixAtoms)を設定する.</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>atoms_list: list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.</p>
+</dd>
+<dt>cell: Cell object</dt><dd><p>Cellオブジェクト</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.set_constraints">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">set_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#set_constraints"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.set_constraints" title="この定義へのパーマリンク"></a></dt>
+<dd><p>各要素(構造)にconstraint(FixAtoms)を設定する.</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>atoms_list: list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.</p>
+</dd>
+<dt>fix_atoms: ase.constraints.FixAtoms</dt><dd><p>FixAtoms</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.set_pbc">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">set_pbc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pbc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#set_pbc"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.set_pbc" title="この定義へのパーマリンク"></a></dt>
+<dd><p>各要素(構造)にconstraint(FixAtoms)を設定する.</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>atoms_list: list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.</p>
+</dd>
+<dt>pbc: bool or list</dt><dd><p>Trueにすると全ての要素に周期境界条件を設定できる</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.translate">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displacement</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#translate"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.translate" title="この定義へのパーマリンク"></a></dt>
+<dd><p>並行移動する</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>atoms_list: list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.</p>
+</dd>
+<dt>displacement: list</dt><dd><p>1*3のリスト[x(float),y(float),z(float)]の場合，全ての構造を同じ変位で並行移動させる．
+[1*3]*nの2Dリストで与えた場合,各要素ごとに異なる変位で並行移動させることができる．</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>破壊的メソッドなので注意!!.特にnote-book形式で実行する場合は慎重に行なう</p>
+</div>
+</dd></dl>
+
+<section id="smiles">
+<h2>SMILESを利用した関数<a class="headerlink" href="#smiles" title="この見出しへのパーマリンク"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.get_smiles">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">get_smiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#get_smiles"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.get_smiles" title="この定義へのパーマリンク"></a></dt>
+<dd><p>カノニカルSMILESを出力する.</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>atoms_list: ase.Atoms or list of ase.Atoms</dt><dd><p>ase.Atomsまたは,そのリスト</p>
+</dd>
+<dt>target0: list of int</dt><dd><p>target0, target1, target2に指定した原子同士の結合を見る,デフォルトでは全ての原子</p>
+</dd>
+<dt>target1: list of int</dt><dd><p>target0に指定した原子との結合を見る</p>
+</dd>
+<dt>target2: list of int</dt><dd><p>target0, target2に指定した原子同士の結合を見る</p>
+</dd>
+<dt>mult: float</dt><dd><p>カットオフの係数(数字が大きいと離れていても結合しているとみなされる)</p>
+</dd>
+<dt>kwargs:</dt><dd><p>元素の共有結合半径を上書きする(例: Al=1.1)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値</dt>
+<dd class="field-odd"><p>カノニカルSMILESのリスト</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.grouping">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">grouping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#grouping"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.grouping" title="この定義へのパーマリンク"></a></dt>
+<dd><p>atoms_listの内,同じ構造をグループする.</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>atoms_list: list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.</p>
+</dd>
+<dt>target0: list of int</dt><dd><p>target0, target1, target2に指定した原子同士の結合を見る</p>
+</dd>
+<dt>target1: list of int</dt><dd><p>target0に指定した原子との結合を見る</p>
+</dd>
+<dt>target2: list of int</dt><dd><p>target0, target2に指定した原子同士の結合を見る</p>
+</dd>
+<dt>output_type: 1 or 2</dt><dd><p>戻り値の形式</p>
+</dd>
+<dt>mult: float</dt><dd><p>カットオフの係数</p>
+</dd>
+<dt>kwargs:</dt><dd><p>元素の名前と共有結合半径を指定(例:Al=1.2), カットオフ値が上書きされる.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>output_type=1の場合,atoms_listと同じ要素数の1Dリストを返す.要素には数値が入っており,同じ構造は同じ数値が入る.
+つまり,数値=グループ名.
+output_type=2の場合,2Dリストを返す.各要素(リスト)には同じ構造と判断されたatoms_listのindex番号が入っている.
+つまり,数値=atoms_listのindex番号であり,要素数=グループの数である.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>RDkitを用いて,カノニカルSMILESを比較することで同じ構造かどうかを判定している.
+結合しているかどうかの判断はASEを用いている.
+カノニカルsmileで比較しているので,1-シクロヘキサンと2-シクロヘキサンは同一であると判断される．
+稀に異なる構造でも同じSMILESを返すことがあるので注意</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.compare">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_list2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#compare"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.compare" title="この定義へのパーマリンク"></a></dt>
+<dd><p>2つのatoms_listが同じ構造か調べる</p>
+<p>atoms_list1とatoms_list2の1番目の要素同士,2番目の要素同士...で比較する</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>atoms_list1: ase.Atoms or list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.またはase.Atoms</p>
+</dd>
+<dt>atoms_list2: ase.Atoms or list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.またはase.Atoms</p>
+</dd>
+<dt>Return: bool or list of bool:</dt><dd><p>構造の同じものはTrueを返す
+atoms_listをリストで与えた場合，boolとNoneを格納したリストを返す
+atoms_list1,atoms_list2のどちらか一方の要素がNoneの場合はNoneの要素が格納される.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.search_same_strucrtures">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">search_same_strucrtures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#search_same_strucrtures"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.search_same_strucrtures" title="この定義へのパーマリンク"></a></dt>
+<dd><p>atoms_listの内,同じ構造を探す．</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>target_atoms: ase.Atoms or list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.またはase.Atoms, 検索対象</p>
+</dd>
+<dt>range_atoms: ase.Atoms or list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.またはase.Atoms, 検索範囲</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値</dt>
+<dd class="field-odd"><p>target_atomsと同じ構造と判断された構造をatoms_listのindex番号で返す.
+target_atomsをリストで与えた場合は2次元リストを返す</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="id1">
+<h2>その他<a class="headerlink" href="#id1" title="この見出しへのパーマリンク"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="matlanticgrrm.atomslist.pfp_calculator">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">pfp_calculator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#pfp_calculator"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.pfp_calculator" title="この定義へのパーマリンク"></a></dt>
+<dd><p>PFPのcalculatorを返す</p>
+<p>ソースコードを確認</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="vibrations.html" class="btn btn-neutral float-left" title="振動解析" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grrmdata.html" class="btn btn-neutral float-right" title="GRRMのデータのインポート" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Kato Taisetsu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

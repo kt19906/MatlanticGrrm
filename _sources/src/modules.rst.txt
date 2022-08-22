@@ -1,0 +1,14 @@
+Modules
+=========================================
+
+.. toctree::
+   :maxdepth: 2
+
+   modules/optimize
+   modules/neb
+   modules/vibrations
+   modules/atomslist
+   modules/grrmdata
+   modules/visualize
+   modules/formats
+   modules/log

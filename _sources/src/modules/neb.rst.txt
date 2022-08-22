@@ -1,0 +1,21 @@
+###########################
+NEB
+###########################
+
+
+
+.. module:: matlanticgrrm.neb
+
+ListNEB クラス
+===============
+.. autoclass:: matlanticgrrm.neb.ListNEB
+
+    その他の引数は :ase:`ase.neb.NEB <neb.html#ase.neb.NEB>` を参照
+
+nebmake()
+=============
+.. autoclass:: matlanticgrrm.neb.nebmake
+
+neb_graph()
+===============
+.. autoclass:: matlanticgrrm.neb.neb_graph

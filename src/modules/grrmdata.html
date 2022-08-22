@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GRRMのデータのインポート &mdash; MatlanticGrrm 2020/08/14 ドキュメント</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/ase.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" />
+    <link rel="next" title="構造の可視化" href="visualize.html" />
+    <link rel="prev" title="Atomsリストの操作" href="atomslist.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> MatlanticGrrm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quick_start.html">クイックスタート</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="optimize.html">構造最適化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="neb.html">NEB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vibrations.html">振動解析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atomslist.html">Atomsリストの操作</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">GRRMのデータのインポート</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#grrmdata">GrrmData クラス</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log2atoms">log2atoms()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#atoms2log">atoms2log()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#eq">EQ クラス</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ts">TS クラス</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pt">PT クラス</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="visualize.html">構造の可視化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formats.html">Atomsリストの保存・読み込み</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tips.html">Tips</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MatlanticGrrm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../modules.html">Modules</a> &raquo;</li>
+      <li>GRRMのデータのインポート</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/src/modules/grrmdata.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-matlanticgrrm.grrmdata">
+<span id="grrm"></span><h1>GRRMのデータのインポート<a class="headerlink" href="#module-matlanticgrrm.grrmdata" title="この見出しへのパーマリンク"></a></h1>
+<section id="grrmdata">
+<h2>GrrmData クラス<a class="headerlink" href="#grrmdata" title="この見出しへのパーマリンク"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.GrrmData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.grrmdata.</span></span><span class="sig-name descname"><span class="pre">GrrmData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eqlog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tslog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptlog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poscar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/grrmdata.html#GrrmData"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.grrmdata.GrrmData" title="この定義へのパーマリンク"></a></dt>
+<dd><p>GRRMのデータをまとめたクラス</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>eqlog: str or pathlib.Path</dt><dd><p>*_EQ_list.logのパス.</p>
+</dd>
+<dt>tslog: str or pathlib.Path</dt><dd><p>*_TS_list.logのパス.</p>
+</dd>
+<dt>ptlog: str or pathlib.Path</dt><dd><p>*_PT_list.logのパス.</p>
+</dd>
+<dt>comfile: str or pathlib.Path</dt><dd><p>*comパス.FrozenAtomsがある場合に使用する.</p>
+</dd>
+<dt>poscar: str or pathlib.Path</dt><dd><p>POSCARまたはCONTCARのパス. 周期境界条件にする際に使用.</p>
+</dd>
+<dt>constraint: bool</dt><dd><p>Trueの場合,FrozenAtomsが固定される.FixAtomsに設定される.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.GrrmData.eq">
+<span class="sig-name descname"><span class="pre">eq</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.GrrmData.eq" title="この定義へのパーマリンク"></a></dt>
+<dd><p><a class="reference internal" href="#matlanticgrrm.grrmdata.EQ" title="matlanticgrrm.grrmdata.EQ"><code class="xref py py-class docutils literal notranslate"><span class="pre">EQ</span></code></a> クラス</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.GrrmData.ts">
+<span class="sig-name descname"><span class="pre">ts</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.GrrmData.ts" title="この定義へのパーマリンク"></a></dt>
+<dd><p><a class="reference internal" href="#matlanticgrrm.grrmdata.TS" title="matlanticgrrm.grrmdata.TS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TS</span></code></a> クラス</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.GrrmData.pt">
+<span class="sig-name descname"><span class="pre">pt</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.GrrmData.pt" title="この定義へのパーマリンク"></a></dt>
+<dd><p><a class="reference internal" href="#matlanticgrrm.grrmdata.PT" title="matlanticgrrm.grrmdata.PT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PT</span></code></a> クラス</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="log2atoms">
+<h2>log2atoms()<a class="headerlink" href="#log2atoms" title="この見出しへのパーマリンク"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.log2atoms">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.grrmdata.</span></span><span class="sig-name descname"><span class="pre">log2atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poscar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/grrmdata.html#log2atoms"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.grrmdata.log2atoms" title="この定義へのパーマリンク"></a></dt>
+<dd><p>GRRMのlogファイルを読み込んでase.Atomsのリストを返す</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>logfile: str or pathlib.Path</dt><dd><p>*PT_list.logファイルパス</p>
+</dd>
+<dt>comfile: str or pathlib.Path</dt><dd><p>*comファイルパス</p>
+</dd>
+<dt>poscar: str or pathlib.Path</dt><dd><p>POSCARまたはCONTCARファイルパス. 周期境界条件(pbc=True)にする場合に設定</p>
+</dd>
+<dt>constraints: bool</dt><dd><p>FrozenAtomsをConstraintsに設定する場合True</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値</dt>
+<dd class="field-odd"><p>ase.Atomsを要素とするリスト.</p>
+</dd>
+<dt class="field-even">戻り値の型</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="atoms2log">
+<h2>atoms2log()<a class="headerlink" href="#atoms2log" title="この見出しへのパーマリンク"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.atoms2log">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.grrmdata.</span></span><span class="sig-name descname"><span class="pre">atoms2log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ini_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fin_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">com</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/grrmdata.html#atoms2log"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.grrmdata.atoms2log" title="この定義へのパーマリンク"></a></dt>
+<dd><p>GRRMの*list.logのようなファイルを作成する</p>
+<p>ase.Atomsのリストを読みとり,*EQ_list.logファイルと*TS_list.logファイルを作成する</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>name: str</dt><dd><p>{name}_EQ_list.logの形でファイルを作成する.</p>
+</dd>
+<dt>ini_list: list of ase.Atoms</dt><dd><p>初期構造のase.Atomsのリスト.最適化に失敗しているものは要素をNoneにする</p>
+</dd>
+<dt>ts_list: list of ase.Atoms</dt><dd><p>TS構造のase.Atomsのリスト.TS計算がうまくいかなかったものは要素をNone</p>
+</dd>
+<dt>fin_lisr: list of ase.Atoms</dt><dd><p>終構造のase.Atomsのリスト</p>
+</dd>
+<dt>calc_func: function obj</dt><dd><p>calculatorを設定していない場合はcalculatorを返す関数を設定する</p>
+</dd>
+<dt>com: bool</dt><dd><p>Trueにすると,comファイルを作成する</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="eq">
+<h2>EQ クラス<a class="headerlink" href="#eq" title="この見出しへのパーマリンク"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.EQ">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.grrmdata.</span></span><span class="sig-name descname"><span class="pre">EQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poscar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/grrmdata.html#EQ"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.grrmdata.EQ" title="この定義へのパーマリンク"></a></dt>
+<dd><p>EQの情報をまとめたクラス.</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>logfile: str or pathlib.Path</dt><dd><p>*EQ_list.logファイルパス</p>
+</dd>
+<dt>comfile: str or pathlib.Path</dt><dd><p>*comファイルパス</p>
+</dd>
+<dt>poscar: str or pathlib.Path</dt><dd><p>POSCARまたはCONTCARファイルパス. 周期境界条件(pbc=True)にする場合に設定</p>
+</dd>
+<dt>constraints: bool</dt><dd><p>FrozenAtomsをConstraintsに設定する場合True</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.EQ.atoms">
+<span class="sig-name descname"><span class="pre">atoms</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.EQ.atoms" title="この定義へのパーマリンク"></a></dt>
+<dd><p>ase.Atomsオブジェクトを要素とするリスト.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.EQ.energies">
+<span class="sig-name descname"><span class="pre">energies</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.EQ.energies" title="この定義へのパーマリンク"></a></dt>
+<dd><p>GRRMで計算されたエネルギー(eV)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.EQ.move_chemical_symbols">
+<span class="sig-name descname"><span class="pre">move_chemical_symbols</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.EQ.move_chemical_symbols" title="この定義へのパーマリンク"></a></dt>
+<dd><p>動かす原子の元素のリスト</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.EQ.move_positions">
+<span class="sig-name descname"><span class="pre">move_positions</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.EQ.move_positions" title="この定義へのパーマリンク"></a></dt>
+<dd><p>動かす原子の座標</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.EQ.frozen_chemical_symbols">
+<span class="sig-name descname"><span class="pre">frozen_chemical_symbols</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.EQ.frozen_chemical_symbols" title="この定義へのパーマリンク"></a></dt>
+<dd><p>FrozenAtomsの元素のリスト</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.EQ.frozen_positions">
+<span class="sig-name descname"><span class="pre">frozen_positions</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.EQ.frozen_positions" title="この定義へのパーマリンク"></a></dt>
+<dd><p>FrozenAtomsの座標</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="ts">
+<h2>TS クラス<a class="headerlink" href="#ts" title="この見出しへのパーマリンク"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.TS">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.grrmdata.</span></span><span class="sig-name descname"><span class="pre">TS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poscar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/grrmdata.html#TS"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.grrmdata.TS" title="この定義へのパーマリンク"></a></dt>
+<dd><p>TSの情報をまとめたクラス.</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>logfile: str or pathlib.Path</dt><dd><p>*TS_list.logファイルパス</p>
+</dd>
+<dt>comfile: str or pathlib.Path</dt><dd><p>*comファイルパス</p>
+</dd>
+<dt>poscar: str or pathlib.Path</dt><dd><p>POSCARまたはCONTCARファイルパス. 周期境界条件(pbc=True)にする場合に設定</p>
+</dd>
+<dt>constraints: bool</dt><dd><p>FrozenAtomsをConstraintsに設定する場合True</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.TS.atoms">
+<span class="sig-name descname"><span class="pre">atoms</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.TS.atoms" title="この定義へのパーマリンク"></a></dt>
+<dd><p>ase.Atomsオブジェクトを要素とするリスト.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.TS.connections">
+<span class="sig-name descname"><span class="pre">connections</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.TS.connections" title="この定義へのパーマリンク"></a></dt>
+<dd><p>GRRMで計算されたCONNECTIONS</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.TS.energies">
+<span class="sig-name descname"><span class="pre">energies</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.TS.energies" title="この定義へのパーマリンク"></a></dt>
+<dd><p>GRRMで計算されたエネルギー(eV)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.TS.move_chemical_symbols">
+<span class="sig-name descname"><span class="pre">move_chemical_symbols</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.TS.move_chemical_symbols" title="この定義へのパーマリンク"></a></dt>
+<dd><p>動かす原子の元素のリスト</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.TS.move_positions">
+<span class="sig-name descname"><span class="pre">move_positions</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.TS.move_positions" title="この定義へのパーマリンク"></a></dt>
+<dd><p>動かす原子の座標</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.TS.frozen_chemical_symbols">
+<span class="sig-name descname"><span class="pre">frozen_chemical_symbols</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.TS.frozen_chemical_symbols" title="この定義へのパーマリンク"></a></dt>
+<dd><p>FrozenAtomsの元素のリスト</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.TS.frozen_positions">
+<span class="sig-name descname"><span class="pre">frozen_positions</span></span><a class="headerlink" href="#matlanticgrrm.grrmdata.TS.frozen_positions" title="この定義へのパーマリンク"></a></dt>
+<dd><p>FrozenAtomsの座標</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="pt">
+<h2>PT クラス<a class="headerlink" href="#pt" title="この見出しへのパーマリンク"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="matlanticgrrm.grrmdata.PT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.grrmdata.</span></span><span class="sig-name descname"><span class="pre">PT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poscar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/grrmdata.html#PT"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.grrmdata.PT" title="この定義へのパーマリンク"></a></dt>
+<dd><p>PTの情報をまとめたクラス.</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>logfile: str or pathlib.Path</dt><dd><p>*PT_list.logファイルパス</p>
+</dd>
+<dt>comfile: str or pathlib.Path</dt><dd><p>*comファイルパス</p>
+</dd>
+<dt>poscar: str or pathlib.Path</dt><dd><p>POSCARまたはCONTCARファイルパス. 周期境界条件(pbc=True)にする場合に設定</p>
+</dd>
+<dt>constraints: bool</dt><dd><p>FrozenAtomsをConstraintsに設定する場合True</p>
+</dd>
+</dl>
+<p><a class="reference internal" href="#matlanticgrrm.grrmdata.TS" title="matlanticgrrm.grrmdata.TS"><code class="xref py py-class docutils literal notranslate"><span class="pre">TS</span></code></a> クラスと同じPoperty</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="atomslist.html" class="btn btn-neutral float-left" title="Atomsリストの操作" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="visualize.html" class="btn btn-neutral float-right" title="構造の可視化" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Kato Taisetsu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

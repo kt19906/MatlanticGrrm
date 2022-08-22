@@ -1,0 +1,125 @@
+###########################
+構造の可視化
+###########################
+.. module:: matlanticgrrm.visualize
+
+| visualizeモジュールは化学構造を可視化するためのモジュールである.
+| 可視化のためのいくつかの関数を提供する.
+
+- :func:`view` 1つまたは複数の構造を表示する
+- :func:`view_images` 1つまたは複数の **動きのある構造** を表示する
+- :func:`view_with_index` 1つの構造について, **原子ごとのindex番号付き** で構造を表示する
+- :func:`view_with_coordinate` 1つの構造について, **座標付き** で構造を表示する
+
++----------------------------------+------------------------------------------+
+| 関数                             | 取ることのできる引数                     |
+|                                  +-------+-----------------+----------------+
+|                                  | Atoms |Atomsの1Dリスト  |Atomsの2Dリスト |
++==================================+=======+=================+================+
+| :func:`view_with_index`          |   ✓   |                 |                |
++----------------------------------+-------+-----------------+----------------+
+| :func:`view_with_coordinate`     |   ✓   |                 |                |
++----------------------------------+-------+-----------------+----------------+
+| :func:`view`                     |   ✓   |       ✓         |                |
++----------------------------------+-------+-----------------+----------------+
+| :func:`view_images`              |       |       ✓         |        ✓       |
++----------------------------------+-------+-----------------+----------------+
+
+例 ``view``
+
+.. code-block:: python
+
+    from matlanticgrrm.visualize import *
+    import ase
+    from ase.io import read,iread
+    atoms = read("EQ0.json",format="json")
+    view(atoms) # Atomsを引数とした場合
+
+
+.. image:: img/view_atoms.png
+    :width: 400px
+    :align: center
+
+.. code-block:: python
+
+    atoms_list = [atoms for atoms in iread("EQ_list.json",format="json")]
+    view(atoms_list) # 1DのAtomsリストを引数とした場合
+
+.. image:: img/view_1Datoms.png
+    :width: 400px
+    :align: center
+
+スライドバーまたはテキストボックスの値を変化させることで複数の構造を表示できる.
+
+例 ``view_images``
+
+.. code-block:: python
+
+    from ase.io.trajectory import Trajectory
+
+    traj = Trajectory("vib1.0.traj")
+    images = [atoms for atoms in traj]
+    view_images(images) # Atomsの1Dリストを引数とした場合
+
+.. image:: img/view_images_1Datoms.png
+    :width: 400px
+    :align: center
+
+再生ボタン付きで表示される
+
+.. code-block:: python
+
+    from ase.io.trajectory import Trajectory
+
+    traj_path = ["vib1.0.traj","vib2.0.traj","vib3.0.traj","vib4.0.traj"]
+    traj_list = [Trajectory(file) for file in traj_path]
+    images_list = [[atoms for atoms in traj] for traj in traj_list]
+    view_images(images_list) # Atomsの2Dリストを引数とした場合
+
+.. image:: img/view_images_2Datoms.png
+    :width: 400px
+    :align: center
+
+スライドバーまたはテキストボックスの値を変化させることで複数の構造を表示できる.
+
+例 ``view_with_index``
+
+.. code-block:: python
+
+    atoms = read("EQ0.json",format="json")
+    view_with_index(atoms)
+
+.. image:: img/view_with_index.png
+    :width: 400px
+    :align: center
+
+index番号が表示される
+
+例 ``view_with_coordinate``
+
+.. code-block:: python
+
+    atoms = read("EQ0.json",format="json")
+    view_with_coordinate(atoms)
+
+.. image:: img/view_with_coordinate.png
+    :width: 400px
+    :align: center
+
+カーソルを合わせた原子の座標が表示される.
+
+view()
+==========
+.. autofunction:: matlanticgrrm.visualize.view
+
+view_images()
+=================
+.. autofunction:: matlanticgrrm.visualize.view_images
+
+view_with_index()
+====================
+.. autofunction:: matlanticgrrm.visualize.view_with_index
+
+view_with_coordinate()
+==========================
+.. autofunction:: matlanticgrrm.visualize.view_with_coordinate

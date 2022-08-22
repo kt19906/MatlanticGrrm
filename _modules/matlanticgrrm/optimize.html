@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>matlanticgrrm.optimize &mdash; MatlanticGrrm 2020/08/14 ドキュメント</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/ase.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> MatlanticGrrm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../src/quick_start.html">クイックスタート</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/tips.html">Tips</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MatlanticGrrm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">モジュールコード</a> &raquo;</li>
+      <li>matlanticgrrm.optimize</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>matlanticgrrm.optimize のソースコード</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pstats</span>
+<span class="kn">from</span> <span class="nn">xml.dom.pulldom</span> <span class="kn">import</span> <span class="n">PROCESSING_INSTRUCTION</span>
+<span class="kn">import</span> <span class="nn">ase</span>
+<span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atoms</span>
+<span class="kn">from</span> <span class="nn">ase.neb</span> <span class="kn">import</span> <span class="n">NEB</span>
+<span class="kn">from</span> <span class="nn">ase.io</span> <span class="kn">import</span> <span class="n">Trajectory</span>
+<span class="kn">from</span> <span class="nn">ase.optimize</span> <span class="kn">import</span> <span class="n">BFGS</span><span class="p">,</span> <span class="n">LBFGS</span><span class="p">,</span><span class="n">LBFGSLineSearch</span><span class="p">,</span><span class="n">BFGSLineSearch</span><span class="p">,</span><span class="n">FIRE</span>
+<span class="c1"># from sella import Sella, Constraints</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">getLogger</span><span class="p">,</span><span class="n">StreamHandler</span><span class="p">,</span><span class="n">FileHandler</span><span class="p">,</span><span class="n">Formatter</span><span class="p">,</span><span class="n">DEBUG</span><span class="p">,</span><span class="n">INFO</span><span class="p">,</span><span class="n">WARNING</span><span class="p">,</span><span class="n">ERROR</span><span class="p">,</span><span class="n">CRITICAL</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tqdm.notebook</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">timeout_decorator</span> <span class="kn">import</span> <span class="n">timeout</span><span class="p">,</span> <span class="ne">TimeoutError</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span><span class="nn">os</span><span class="o">,</span><span class="nn">pathlib</span><span class="o">,</span><span class="nn">logging</span><span class="o">,</span><span class="nn">math</span>
+
+<span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">reset_logger</span><span class="p">,</span> <span class="n">add_filehandler</span>
+<span class="kn">from</span> <span class="nn">.neb</span> <span class="kn">import</span> <span class="n">ListNEB</span>
+
+<div class="viewcode-block" id="ListOptimizer"><a class="viewcode-back" href="../../src/modules/optimize.html#matlanticgrrm.optimize.ListOptimizer">[ドキュメント]</a><span class="k">class</span> <span class="nc">ListOptimizer</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;全てのOptimizerの親クラス</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    </span>
+<span class="sd">    atoms_list: list of Atoms</span>
+<span class="sd">        Atomsのリスト, NEB計算の時はListNEBオブジェクト</span>
+<span class="sd">    savename: str</span>
+<span class="sd">        | 計算実行(run)中に`{savename}.trajと{savename}.pickleが逐次作成される. </span>
+<span class="sd">        | trajファイルには計算後の構造,pickleファイルには収束,未収束などの計算結果の情報が記録される.</span>
+<span class="sd">    logfolder: str or path object</span>
+<span class="sd">        ASEのlogfile引数に相当するが,ASEとは異なり,複数のlogファイルが作成されるためフォルダ名を指定する</span>
+<span class="sd">    trajfolder: str or path object</span>
+<span class="sd">        ASEのtrajectory引数に相当するが,ASEとは異なり,複数のtrajファイルが作成されるためフォルダ名を指定する</span>
+<span class="sd">    errorlog: str or path object</span>
+<span class="sd">        | 計算実行(run)中にerrorlogファイルが作成される. </span>
+<span class="sd">        | 内容はsavenameの pickleファイルと似ているがテキストファイルで出力される.</span>
+<span class="sd">    indexes: list of integers</span>
+<span class="sd">        特定の要素のみを計算したい場合にindex番号のリストで計算対象を指定する.</span>
+<span class="sd">    max_fmax: float</span>
+<span class="sd">        初期構造のforceがmax_fmaxを上回った際には計算を実行しない. 特にNEB計算の際には役立つ.</span>
+<span class="sd">    timeout: integer</span>
+<span class="sd">        1回のイタレーションにtimeout(秒)以上かかる際に計算を途中で諦める.</span>
+<span class="sd">        ListSellaを使ったTS計算の際に特に役立つ</span>
+<span class="sd">    maxstep: float</span>
+<span class="sd">        | 1回のイタレーションで動く原子の最大値. VASPのPOTIMに相当.</span>
+<span class="sd">        | MatlanticGrrmでなくASEで用意されている引数.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atoms_list</span><span class="p">:</span><span class="nb">list</span><span class="p">,</span><span class="n">savename</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">logfolder</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">trajfolder</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">errorlog</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">indexes</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">max_fmax</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span><span class="n">timeout</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">60</span><span class="o">*</span><span class="mi">20</span><span class="p">,</span><span class="c1">#ここまでがユーザー定義の引数</span>
+                 <span class="n">restart</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">maxstep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">master</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">force_consistent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1">##user定義##</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span> <span class="o">=</span> <span class="n">atoms_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">savename</span> <span class="o">=</span> <span class="n">savename</span> <span class="c1"># 計算(run)すると{sefl.savename}.trajと{sefl.savename}.pickleが作成される</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logfolder</span> <span class="o">=</span> <span class="n">logfolder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trajfolder</span> <span class="o">=</span> <span class="n">trajfolder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorlog</span> <span class="o">=</span> <span class="n">errorlog</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indexes</span> <span class="o">=</span> <span class="n">indexes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_fmax</span> <span class="o">=</span> <span class="n">max_fmax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_list</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># pickleファイルに保存するリスト</span>
+        <span class="c1">##ase由来##</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restart</span> <span class="o">=</span> <span class="n">restart</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxstep</span> <span class="o">=</span> <span class="n">maxstep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">master</span> <span class="o">=</span> <span class="n">master</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">force_consistent</span> <span class="o">=</span> <span class="n">force_consistent</span>
+        
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="p">)</span><span class="o">==</span><span class="n">ListNEB</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;NEB計算を行なう場合trajに保存すべきは,ListNEN.imagess&quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_datas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="o">.</span><span class="n">imagess</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;それ以外の計算ではAtomsリストをtrajに保存&quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_datas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span>
+            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">indexes</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="p">))]</span>
+            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfolder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logfolder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">logfolder</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfolder</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfolder</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">logfolder</span><span class="o">/</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.log&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="p">))]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="p">))]</span>
+                
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajfolder</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trajfolder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">trajfolder</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajfolder</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trajfolder</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trajectorys</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">trajfolder</span><span class="o">/</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.traj&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="p">))]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trajectorys</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectorys</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trajectorys</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="p">))]</span>       
+            
+    <span class="k">def</span> <span class="nf">start_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;何番目から計算を開始するか</span>
+<span class="sd">        </span>
+<span class="sd">        stop.logが存在する時はstpo.logに書かれている番号から計算を開始する</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">reset_logger</span><span class="p">()</span> <span class="c1">#loggerをリセット  </span>
+        <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;stop.log&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;stop.log&quot;</span><span class="p">,</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span> <span class="c1">#n番目から計算を始める</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;stop.log&quot;</span><span class="p">)</span>
+            <span class="n">add_filehandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span><span class="s2">&quot;a&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">errorlog</span><span class="p">,</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">add_filehandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">errorlog</span><span class="p">,</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+        
+    <span class="k">def</span> <span class="nf">write_stop_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;stop.log&quot;</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> 
+            
+    <span class="k">def</span> <span class="nf">ase_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atoms</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">fmax</span><span class="p">,</span><span class="n">steps</span><span class="p">):</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mk_opt_func</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">trajectorys</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="nd">@timeout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">_internal</span><span class="p">(</span><span class="n">opt</span><span class="p">):</span>
+            <span class="n">opt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">irun</span><span class="p">(</span><span class="n">opt</span><span class="p">):</span>
+            <span class="c1"># compute initial structure and log the first step</span>
+            <span class="n">opt</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_forces</span><span class="p">()</span>
+
+            <span class="c1"># yield the first time to inspect before logging</span>
+            <span class="k">yield</span> <span class="kc">False</span>
+            
+            <span class="k">if</span> <span class="n">opt</span><span class="o">.</span><span class="n">nsteps</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">opt</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
+                <span class="n">opt</span><span class="o">.</span><span class="n">call_observers</span><span class="p">()</span>
+
+            <span class="c1"># run the algorithm until converged or max_steps reached</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">opt</span><span class="o">.</span><span class="n">converged</span><span class="p">()</span> <span class="ow">and</span> <span class="n">opt</span><span class="o">.</span><span class="n">nsteps</span> <span class="o">&lt;</span> <span class="n">opt</span><span class="o">.</span><span class="n">max_steps</span><span class="p">:</span>
+
+                <span class="c1"># compute the next step</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">_internal</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">dnf</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+
+                <span class="n">opt</span><span class="o">.</span><span class="n">nsteps</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="c1"># let the user inspect the step and change things before logging</span>
+                <span class="c1"># and predicting the next step</span>
+                <span class="k">yield</span> <span class="kc">False</span>
+
+                <span class="c1"># log the step</span>
+                <span class="n">opt</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
+                <span class="n">opt</span><span class="o">.</span><span class="n">call_observers</span><span class="p">()</span>
+
+            <span class="c1"># finally check if algorithm was converged</span>
+            <span class="k">yield</span> <span class="n">opt</span><span class="o">.</span><span class="n">converged</span><span class="p">()</span>
+
+        <span class="n">opt</span><span class="o">.</span><span class="n">fmax</span> <span class="o">=</span> <span class="n">fmax</span>
+        <span class="k">if</span> <span class="n">steps</span><span class="p">:</span>
+            <span class="n">opt</span><span class="o">.</span><span class="n">max_steps</span> <span class="o">=</span> <span class="n">steps</span>
+
+        <span class="k">for</span> <span class="n">converged</span> <span class="ow">in</span> <span class="n">irun</span><span class="p">(</span><span class="n">opt</span><span class="p">):</span>
+            <span class="k">pass</span>
+        
+        <span class="k">return</span> <span class="n">opt</span>
+    
+    <span class="k">def</span> <span class="nf">save_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atoms</span><span class="p">,</span><span class="n">mode</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="p">)</span> <span class="o">==</span> <span class="n">ListNEB</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;NEBの時&quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">atoms</span><span class="p">:</span> <span class="c1"># objectが存在しない時</span>
+                <span class="n">atoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">Atoms</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="o">.</span><span class="n">n_images</span><span class="p">)]</span>
+            <span class="n">n_images</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">atm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;w&quot;</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">Trajectory</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">savename</span><span class="si">}</span><span class="s2">.traj&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atm</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">Trajectory</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">savename</span><span class="si">}</span><span class="s2">.traj&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atm</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;それ以外&quot;&quot;&quot;</span>
+            <span class="n">n_images</span>  <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">atoms</span><span class="p">:</span>
+                <span class="n">atoms</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">()</span>
+            <span class="n">Trajectory</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">savename</span><span class="si">}</span><span class="s2">.traj&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+            
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">savename</span><span class="si">}</span><span class="s2">.pickle&quot;</span><span class="p">,</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">state_list</span><span class="p">,</span> <span class="n">n_images</span><span class="p">),</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="o">*</span><span class="n">comment</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: 完了 force=</span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> state </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>     
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: index未指定 state </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: objectが存在しない state </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: np.linalg.LinAlgError force=</span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> state </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: 未収束 force=</span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> state </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: TimeOut force=</span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> state </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: forceがmax_fmaxを上回っている force=</span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> state </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: force計算不可 state </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">comment</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> state </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">atoms</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;計算する前に構造やオブジェクトの有無を確認する</span>
+<span class="sd">        </span>
+<span class="sd">        param:</span>
+<span class="sd">        </span>
+<span class="sd">        i: int</span>
+<span class="sd">            i番目の計算</span>
+<span class="sd">        atoms: Atoms or NEB</span>
+<span class="sd">            i番目のAtomsオブジェクト. NEB計算の時はNEBオブジェクト</span>
+<span class="sd">            </span>
+<span class="sd">        Return:</span>
+<span class="sd">            1つでもひっかればFalseを返す</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dnf</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># タイムアウトした場合True. Do not finished</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexes</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;indexesに与えられてない時&quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">atoms</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;Atoms or NEBオブジェクトが存在しない(None)の時&quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">force</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_forces</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">force</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_fmax</span><span class="p">:</span>
+                <span class="sd">&quot;&quot;&quot;force &gt; max_fmaxの時&quot;&quot;&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="n">force</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>  
+            <span class="k">elif</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">sqrt</span><span class="p">((</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_forces</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">())):</span>
+                <span class="sd">&quot;&quot;&quot;force=&quot;nan&quot;の時&quot;&quot;&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">7</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    
+<div class="viewcode-block" id="ListOptimizer.run"><a class="viewcode-back" href="../../src/modules/optimize.html#matlanticgrrm.optimize.ListOptimizer.run">[ドキュメント]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fmax</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">100000000</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;計算を実行する</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        </span>
+<span class="sd">        fmax:</span>
+<span class="sd">            収束条件となるforce</span>
+<span class="sd">        steps: integer</span>
+<span class="sd">            最大ステップ数</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_number</span><span class="p">()</span> <span class="c1">#n番目から計算を始める</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="p">[</span><span class="n">n</span><span class="p">:]),</span><span class="n">start</span><span class="o">=</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;stop.log&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write_stop_log</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">atoms</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_run</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">fmax</span><span class="p">,</span><span class="n">steps</span><span class="p">)</span>
+                    <span class="n">force</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">sqrt</span><span class="p">((</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_forces</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span><span class="mi">4</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">opt</span><span class="o">.</span><span class="n">converged</span><span class="p">():</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">force</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dnf</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="n">force</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="n">force</span><span class="p">)</span>             
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_obj</span><span class="p">,</span> <span class="n">exc_tb</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+                    <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">exc_tb</span><span class="o">.</span><span class="n">tb_frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="n">exc_type</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">exc_tb</span><span class="o">.</span><span class="n">tb_lineno</span><span class="p">)</span>
+            <span class="c1"># trajファイルに保存する</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1">#始めは上書き保存</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_datas</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_datas</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">)</span></div></div>
+                            
+<div class="viewcode-block" id="ListBFGS"><a class="viewcode-back" href="../../src/modules/optimize.html#matlanticgrrm.optimize.ListBFGS">[ドキュメント]</a><span class="k">class</span> <span class="nc">ListBFGS</span><span class="p">(</span><span class="n">ListOptimizer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms_list</span><span class="p">,</span> <span class="n">savename</span><span class="p">,</span> <span class="n">logfolder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errorlog</span><span class="o">=</span><span class="s2">&quot;error.log&quot;</span><span class="p">,</span> <span class="n">trajfolder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">max_fmax</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span><span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="o">*</span><span class="mi">20</span><span class="p">,</span> 
+                 <span class="n">restart</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">,</span><span class="n">savename</span><span class="p">,</span><span class="n">logfolder</span><span class="p">,</span><span class="n">trajfolder</span><span class="p">,</span><span class="n">errorlog</span><span class="p">,</span><span class="n">indexes</span><span class="p">,</span><span class="n">max_fmax</span><span class="p">,</span><span class="n">timeout</span><span class="p">,</span>
+                         <span class="n">restart</span><span class="p">,</span><span class="n">maxstep</span><span class="p">,</span><span class="n">master</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        
+    <span class="k">def</span> <span class="nf">mk_opt_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atoms</span><span class="p">,</span><span class="n">logfile</span><span class="p">,</span><span class="n">trajectory</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BFGS</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">restart</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">restart</span><span class="p">,</span><span class="n">logfile</span><span class="o">=</span><span class="n">logfile</span><span class="p">,</span><span class="n">trajectory</span><span class="o">=</span><span class="n">trajectory</span><span class="p">,</span>
+                     <span class="n">maxstep</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxstep</span><span class="p">,</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span></div>
+            
+<div class="viewcode-block" id="ListLBFGS"><a class="viewcode-back" href="../../src/modules/optimize.html#matlanticgrrm.optimize.ListLBFGS">[ドキュメント]</a><span class="k">class</span> <span class="nc">ListLBFGS</span><span class="p">(</span><span class="n">ListOptimizer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ase.optimize.LBFGSをase.Atomsのリストを引数に使用できるようにしたもの.        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms_list</span><span class="p">,</span> <span class="n">savename</span><span class="p">,</span> <span class="n">logfolder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errorlog</span><span class="o">=</span><span class="s2">&quot;error.log&quot;</span><span class="p">,</span> <span class="n">trajfolder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">max_fmax</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span><span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="o">*</span><span class="mi">20</span><span class="p">,</span>
+                 <span class="n">restart</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">memory</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">damping</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                 <span class="n">alpha</span><span class="o">=</span><span class="mf">70.0</span><span class="p">,</span><span class="n">use_line_search</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">force_consistent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">,</span><span class="n">savename</span><span class="p">,</span><span class="n">logfolder</span><span class="p">,</span><span class="n">trajfolder</span><span class="p">,</span><span class="n">errorlog</span><span class="p">,</span><span class="n">indexes</span><span class="p">,</span><span class="n">max_fmax</span><span class="p">,</span><span class="n">timeout</span><span class="p">,</span>
+                         <span class="n">restart</span><span class="p">,</span><span class="n">maxstep</span><span class="p">,</span><span class="n">master</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory</span> <span class="o">=</span> <span class="n">memory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">damping</span> <span class="o">=</span> <span class="n">damping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_line_search</span> <span class="o">=</span> <span class="n">use_line_search</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">force_consistent</span> <span class="o">=</span> <span class="n">force_consistent</span>
+        
+    <span class="k">def</span> <span class="nf">mk_opt_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atoms</span><span class="p">,</span><span class="n">logfile</span><span class="p">,</span><span class="n">trajectory</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">LBFGS</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">restart</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">restart</span><span class="p">,</span><span class="n">logfile</span><span class="o">=</span><span class="n">logfile</span><span class="p">,</span><span class="n">trajectory</span><span class="o">=</span><span class="n">trajectory</span><span class="p">,</span>
+                     <span class="n">maxstep</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxstep</span><span class="p">,</span><span class="n">memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">memory</span><span class="p">,</span><span class="n">damping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">damping</span><span class="p">,</span>
+                     <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span><span class="n">use_line_search</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_line_search</span><span class="p">,</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">,</span>
+                     <span class="n">force_consistent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">force_consistent</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="ListBFGSLineSearch"><a class="viewcode-back" href="../../src/modules/optimize.html#matlanticgrrm.optimize.ListBFGSLineSearch">[ドキュメント]</a><span class="k">class</span> <span class="nc">ListBFGSLineSearch</span><span class="p">(</span><span class="n">ListLBFGS</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms_list</span><span class="p">,</span> <span class="n">savename</span><span class="p">,</span> <span class="n">logfolder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errorlog</span><span class="o">=</span><span class="s2">&quot;error.log&quot;</span><span class="p">,</span> <span class="n">trajfolder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_fmax</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span><span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="o">*</span><span class="mi">20</span><span class="p">,</span>
+                 <span class="n">restart</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">c1</span><span class="o">=</span><span class="mf">0.23</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="mf">0.46</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">stpmax</span><span class="o">=</span><span class="mf">50.0</span><span class="p">,</span>
+                 <span class="n">master</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_consistent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">,</span><span class="n">savename</span><span class="p">,</span><span class="n">logfolder</span><span class="p">,</span><span class="n">trajfolder</span><span class="p">,</span><span class="n">errorlog</span><span class="p">,</span><span class="n">indexes</span><span class="p">,</span><span class="n">max_fmax</span><span class="p">,</span><span class="n">timeout</span><span class="p">,</span>
+                         <span class="n">restart</span><span class="p">,</span><span class="n">maxstep</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">force_consistent</span><span class="o">=</span><span class="n">force_consistent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c1</span> <span class="o">=</span> <span class="n">c1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c2</span> <span class="o">=</span> <span class="n">c2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stpmax</span> <span class="o">=</span> <span class="n">stpmax</span>
+        
+    <span class="k">def</span> <span class="nf">mk_opt_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atoms</span><span class="p">,</span><span class="n">logfile</span><span class="p">,</span><span class="n">trajectory</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BFGSLineSearch</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">restart</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">restart</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="n">logfile</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxstep</span><span class="p">,</span>
+                 <span class="n">trajectory</span><span class="o">=</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">c1</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">c2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="n">stpmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stpmax</span><span class="p">,</span>
+                 <span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">,</span> <span class="n">force_consistent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">force_consistent</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ListLBFGSLineSearch"><a class="viewcode-back" href="../../src/modules/optimize.html#matlanticgrrm.optimize.ListLBFGSLineSearch">[ドキュメント]</a><span class="k">class</span> <span class="nc">ListLBFGSLineSearch</span><span class="p">(</span><span class="n">ListLBFGS</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms_list</span><span class="p">,</span> <span class="n">savename</span><span class="p">,</span> <span class="n">logfolder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errorlog</span><span class="o">=</span><span class="s2">&quot;error.log&quot;</span><span class="p">,</span> <span class="n">trajfolder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_fmax</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="o">*</span><span class="mi">20</span><span class="p">,</span>
+                 <span class="n">restart</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">maxstep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">memory</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">damping</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">70.0</span><span class="p">,</span>
+                 <span class="n">use_line_search</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">force_consistent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">,</span><span class="n">savename</span><span class="p">,</span><span class="n">logfolder</span><span class="p">,</span><span class="n">trajfolder</span><span class="p">,</span><span class="n">errorlog</span><span class="p">,</span><span class="n">indexes</span><span class="p">,</span><span class="n">max_fmax</span><span class="p">,</span><span class="n">timeout</span><span class="p">,</span>
+                         <span class="n">restart</span><span class="p">,</span><span class="n">maxstep</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">force_consistent</span><span class="o">=</span><span class="n">force_consistent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory</span> <span class="o">=</span> <span class="n">memory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">damping</span> <span class="o">=</span> <span class="n">damping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_line_search</span> <span class="o">=</span> <span class="n">use_line_search</span>
+        
+    <span class="k">def</span> <span class="nf">mk_opt_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atoms</span><span class="p">,</span><span class="n">logfile</span><span class="p">,</span><span class="n">trajectory</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">LBFGSLineSearch</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span> <span class="n">restart</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">restart</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="n">logfile</span><span class="p">,</span> <span class="n">trajectory</span><span class="o">=</span><span class="n">trajectory</span><span class="p">,</span>
+                               <span class="n">maxstep</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxstep</span><span class="p">,</span><span class="n">memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">memory</span><span class="p">,</span> <span class="n">damping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">damping</span><span class="p">,</span>
+                               <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span><span class="n">use_line_search</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_line_search</span><span class="p">,</span> 
+                               <span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">,</span> <span class="n">force_consistent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">force_consistent</span><span class="p">)</span> </div>
+        
+<div class="viewcode-block" id="ListFIRE"><a class="viewcode-back" href="../../src/modules/optimize.html#matlanticgrrm.optimize.ListFIRE">[ドキュメント]</a><span class="k">class</span> <span class="nc">ListFIRE</span><span class="p">(</span><span class="n">ListOptimizer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms_list</span><span class="p">,</span> <span class="n">savename</span><span class="p">,</span> <span class="n">logfolder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errorlog</span><span class="o">=</span><span class="s2">&quot;error.log&quot;</span><span class="p">,</span> <span class="n">trajfolder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_fmax</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="o">*</span><span class="mi">20</span><span class="p">,</span>
+                 <span class="n">restart</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxmove</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtmax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">Nmin</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                 <span class="n">finc</span><span class="o">=</span><span class="mf">1.1</span><span class="p">,</span> <span class="n">fdec</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                 <span class="n">astart</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">fa</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">downhill_check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">position_reset_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_consistent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">,</span><span class="n">savename</span><span class="p">,</span><span class="n">logfolder</span><span class="p">,</span><span class="n">trajfolder</span><span class="p">,</span><span class="n">errorlog</span><span class="p">,</span><span class="n">indexes</span><span class="p">,</span><span class="n">max_fmax</span><span class="p">,</span><span class="n">timeout</span><span class="p">,</span>
+                         <span class="n">restart</span><span class="p">,</span><span class="n">maxstep</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">force_consistent</span><span class="o">=</span><span class="n">force_consistent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxmove</span> <span class="o">=</span> <span class="n">maxmove</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtmax</span> <span class="o">=</span> <span class="n">dtmax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nmin</span> <span class="o">=</span> <span class="n">Nmin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finc</span> <span class="o">=</span> <span class="n">finc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fdec</span> <span class="o">=</span> <span class="n">fdec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">astart</span> <span class="o">=</span> <span class="n">astart</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fa</span> <span class="o">=</span> <span class="n">fa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">downhill_check</span> <span class="o">=</span> <span class="n">downhill_check</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position_reset_callback</span> <span class="o">=</span> <span class="n">position_reset_callback</span>
+        
+    <span class="k">def</span> <span class="nf">mk_opt_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atoms</span><span class="p">,</span><span class="n">logfile</span><span class="p">,</span><span class="n">trajectory</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">FIRE</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span><span class="n">restart</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">restart</span><span class="p">,</span><span class="n">logfile</span><span class="o">=</span><span class="n">logfile</span><span class="p">,</span><span class="n">trajectory</span><span class="o">=</span><span class="n">trajectory</span><span class="p">,</span>
+                    <span class="n">dt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">,</span><span class="n">maxstep</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxstep</span><span class="p">,</span><span class="n">maxmove</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxmove</span><span class="p">,</span><span class="n">dtmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtmax</span><span class="p">,</span>
+                    <span class="n">Nmin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Nmin</span><span class="p">,</span><span class="n">finc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">finc</span><span class="p">,</span><span class="n">fdec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fdec</span><span class="p">,</span><span class="n">astart</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">astart</span><span class="p">,</span><span class="n">fa</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fa</span><span class="p">,</span>
+                    <span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span><span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">,</span><span class="n">downhill_check</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">downhill_check</span><span class="p">,</span>
+                    <span class="n">position_reset_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">position_reset_callback</span><span class="p">,</span>
+                    <span class="n">force_consistent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">force_consistent</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="ListSella"><a class="viewcode-back" href="../../src/modules/optimize.html#matlanticgrrm.optimize.ListSella">[ドキュメント]</a><span class="k">class</span> <span class="nc">ListSella</span><span class="p">(</span><span class="n">ListOptimizer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; :sella:`sella.Sella &lt;optimize/optimize.py&gt;` の第一引数にAtomsリストを使用できるように拡張したクラス</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    </span>
+<span class="sd">    retry: integer</span>
+<span class="sd">        | Sellaの計算ではnumpy.linalg.LinAlgErrorで計算が終了する場合が多いが, 多くの場合,再計算を行なうことで問題が解決する.</span>
+<span class="sd">        | retry(回)まではLinAlgErrorが発生しても再計算を行なうようにする.</span>
+<span class="sd">            </span>
+<span class="sd">    その他の引数は :class:`ListBFGS` と :sella:`sella.Sella &lt;optimize/optimize.py&gt;` を参照</span>
+<span class="sd">    </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atoms_list</span><span class="p">,</span> <span class="n">savename</span><span class="p">,</span> <span class="n">logfolder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errorlog</span><span class="o">=</span><span class="s2">&quot;error.log&quot;</span><span class="p">,</span> <span class="n">trajfolder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_fmax</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="o">*</span><span class="mi">20</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">restart</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">master</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_consistent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">delta0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sigma_inc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">sigma_dec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rho_dec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rho_inc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">eig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> 
+                 <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">threepoint</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraints_tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
+                 <span class="n">v0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">internal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">append_trajectory</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nsteps_per_diag</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">,</span><span class="n">savename</span><span class="p">,</span><span class="n">logfolder</span><span class="p">,</span><span class="n">trajfolder</span><span class="p">,</span><span class="n">errorlog</span><span class="p">,</span><span class="n">indexes</span><span class="p">,</span><span class="n">max_fmax</span><span class="p">,</span><span class="n">timeout</span><span class="p">,</span>
+                         <span class="n">restart</span><span class="p">,</span><span class="n">master</span><span class="p">,</span><span class="n">force_consistent</span><span class="o">=</span><span class="n">force_consistent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retry</span> <span class="o">=</span> <span class="n">retry</span> <span class="c1">#最大のエラーの回数</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1">#エラーをカウント</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta0</span> <span class="o">=</span> <span class="n">delta0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma_inc</span> <span class="o">=</span> <span class="n">sigma_inc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma_dec</span> <span class="o">=</span> <span class="n">sigma_dec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rho_dec</span> <span class="o">=</span> <span class="n">rho_dec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rho_inc</span> <span class="o">=</span> <span class="n">rho_inc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="n">order</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eig</span> <span class="o">=</span> <span class="n">eig</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eta</span> <span class="o">=</span> <span class="n">eta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threepoint</span> <span class="o">=</span> <span class="n">threepoint</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">=</span> <span class="n">constraints</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constraints_tol</span> <span class="o">=</span> <span class="n">constraints_tol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v0</span> <span class="o">=</span> <span class="n">v0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">internal</span> <span class="o">=</span> <span class="n">internal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">append_trajectory</span> <span class="o">=</span> <span class="n">append_trajectory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rs</span> <span class="o">=</span> <span class="n">rs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsteps_per_diag</span> <span class="o">=</span> <span class="n">nsteps_per_diag</span>
+
+    <span class="k">def</span> <span class="nf">mk_opt_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atoms</span><span class="p">,</span><span class="n">logfile</span><span class="p">,</span><span class="n">trajectory</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Sella</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">atoms</span><span class="p">,</span><span class="n">restart</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">restart</span><span class="p">,</span><span class="n">logfile</span><span class="o">=</span><span class="n">logfile</span><span class="p">,</span><span class="n">trajectory</span><span class="o">=</span><span class="n">trajectory</span><span class="p">,</span>
+                    <span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">,</span><span class="n">force_consistent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">force_consistent</span><span class="p">,</span><span class="n">delta0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delta0</span><span class="p">,</span>
+                    <span class="n">sigma_inc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma_inc</span><span class="p">,</span><span class="n">sigma_dec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma_dec</span><span class="p">,</span><span class="n">rho_dec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rho_dec</span><span class="p">,</span>
+                    <span class="n">rho_inc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rho_inc</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">,</span><span class="n">eig</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eig</span><span class="p">,</span><span class="n">eta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eta</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span>
+                    <span class="n">gamma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma</span><span class="p">,</span><span class="n">threepoint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">threepoint</span><span class="p">,</span><span class="n">constraints</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">,</span>
+                    <span class="n">constraints_tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints_tol</span><span class="p">,</span><span class="n">v0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">v0</span><span class="p">,</span><span class="n">internal</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">internal</span><span class="p">,</span>
+                    <span class="n">append_trajectory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">append_trajectory</span><span class="p">,</span><span class="n">rs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rs</span><span class="p">,</span><span class="n">nsteps_per_diag</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nsteps_per_diag</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="ListSella.run"><a class="viewcode-back" href="../../src/modules/optimize.html#matlanticgrrm.optimize.ListSella.run">[ドキュメント]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fmax</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">100000000</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;計算を実行する</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        </span>
+<span class="sd">        fmax:</span>
+<span class="sd">            収束条件となるforce</span>
+<span class="sd">        steps: integer</span>
+<span class="sd">            最大ステップ数</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_number</span><span class="p">()</span> <span class="c1"># n番目から計算を始める</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="n">bar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="p">))</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;stop.log&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write_stop_log</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">atoms</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_run</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">fmax</span><span class="p">,</span><span class="n">steps</span><span class="p">)</span>
+                    <span class="n">force</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">sqrt</span><span class="p">((</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_forces</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span><span class="mi">4</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">opt</span><span class="o">.</span><span class="n">converged</span><span class="p">():</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">force</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dnf</span><span class="p">:</span> <span class="c1">#timeoutの場合</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span> <span class="ow">and</span> <span class="n">opt</span><span class="o">.</span><span class="n">nsteps</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: TimeOut </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="si">}</span><span class="s2">回目の再計算を開始する&quot;</span><span class="p">)</span>
+                                <span class="k">continue</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="n">force</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="n">force</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: numpyエラー </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">error_count</span><span class="si">}</span><span class="s2">回目の再計算を開始する&quot;</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">force</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">sqrt</span><span class="p">((</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_forces</span><span class="p">()</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span><span class="mi">4</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">force</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_obj</span><span class="p">,</span> <span class="n">exc_tb</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+                    <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">exc_tb</span><span class="o">.</span><span class="n">tb_frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">write_log</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="n">exc_type</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">exc_tb</span><span class="o">.</span><span class="n">tb_lineno</span><span class="p">)</span>
+            <span class="c1"># trajファイルに保存する</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1">#始めは上書き保存</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_datas</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_datas</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error_count</span> <span class="o">=</span> <span class="mi">0</span>  
+            <span class="n">bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Kato Taisetsu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

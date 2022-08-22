@@ -1,0 +1,29 @@
+###########################
+Atomsリストの操作
+###########################
+
+.. module:: matlanticgrrm
+
+.. note:: get_* メソッドを使用した際に発生するpfp_api_client.exception.PFPAPIErrorは, 
+         大抵の場合,無理な構造に対してPFP-APIがforceを計算できないために発生している.
+         そのためエラーが発生した場合には一度構造を確認すると良い.
+
+.. automodule:: matlanticgrrm.atomslist
+   :members: copy, set_calculator, set_constraints, del_constraints,
+    set_pbc, set_cell, translate, get_potential_energy, get_total_energy,
+    get_forces, get_positions, get_kinetic_energy,
+
+
+SMILESを利用した関数
+====================
+
+.. autofunction:: matlanticgrrm.atomslist.get_smiles
+.. autofunction:: matlanticgrrm.atomslist.grouping
+.. autofunction:: matlanticgrrm.atomslist.compare
+.. autofunction:: matlanticgrrm.atomslist.search_same_strucrtures
+
+その他
+====================
+
+.. autofunction:: matlanticgrrm.atomslist.pfp_calculator
+   

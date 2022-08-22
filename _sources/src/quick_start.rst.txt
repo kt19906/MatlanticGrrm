@@ -1,0 +1,38 @@
+###########################
+クイックスタート
+###########################
+
+構造最適化
+===============
+
+- matlanticgrrm
+
+.. code-block:: python
+
+    from matlanticgrrm.atomslist import set_calculator, pfp_calculator
+    from matlanticgrrm.optimize import ListLBFGS
+    from matlanticgrrm.grrmdata import log2atoms
+
+    atoms_list = log2atoms("*_EQ_list.log","*com","POSCAR") # GRRMデータのインポート
+    set_calculator(atoms_list, pfp_calculator) # calculatorの取り付け
+    opt = ListLBFGS(atoms_list,"EQ_list",logfolder="Log",errorlog='error.log') # AtomsリストをOptimizerに渡す
+    opt.run(fmax=0.001) # 計算実行 
+    # --> Log/0.log, Log/1.log, Log/2.log ... にログが書き込まれる
+    # --> EQ_list.traj, EQ_list.pickle, error.logが作成される
+
+- ASEとの比較
+
+.. code-block:: python
+
+    from matlanticgrrm.atomslist import pfp_calculator
+    from ase.optimize import LBFGS
+    from ase.io import read,write
+
+    atoms = read("*.cif") # 何らかのデータをインポート 
+    atoms.calc = pfp_calculator() # calculatorの取り付け
+    opt = LBFGS(atoms, logfile="EQ.log") # AtomsリストをOptimizerに渡す
+    opt.run(fmax=0.001) # 計算実行
+    # -->  EQ.logにログが書き込まれる
+
+    write("EQ.traj",atoms)
+    # --> EQ.trajが作成される

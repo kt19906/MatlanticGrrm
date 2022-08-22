@@ -1,0 +1,14 @@
+###########################
+振動解析
+###########################
+
+.. module:: matlanticgrrm.vibrations
+
+ListVibrations クラス
+=====================
+.. autoclass:: matlanticgrrm.vibrations.ListVibrations
+   :members:
+
+vib_graph()
+===============
+.. autofunction:: matlanticgrrm.vibrations.vib_graph

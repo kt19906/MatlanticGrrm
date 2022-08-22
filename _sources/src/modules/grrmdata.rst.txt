@@ -1,0 +1,98 @@
+###########################
+GRRMのデータのインポート
+###########################
+.. module:: matlanticgrrm.grrmdata
+
+GrrmData クラス
+===============
+.. autoclass:: matlanticgrrm.grrmdata.GrrmData
+
+    .. autoattribute:: matlanticgrrm.grrmdata.GrrmData.eq
+
+        :class:`EQ` クラス
+    .. autoattribute:: matlanticgrrm.grrmdata.GrrmData.ts
+
+        :class:`TS` クラス
+
+    .. autoattribute:: matlanticgrrm.grrmdata.GrrmData.pt
+
+        :class:`PT` クラス  
+
+
+log2atoms()
+===============
+.. autoclass:: matlanticgrrm.grrmdata.log2atoms
+
+atoms2log()
+===============
+.. autoclass:: matlanticgrrm.grrmdata.atoms2log
+
+
+EQ クラス
+==========
+.. autoclass:: matlanticgrrm.grrmdata.EQ
+
+    .. attribute:: atoms
+
+        ase.Atomsオブジェクトを要素とするリスト.
+
+    .. attribute:: energies
+
+        GRRMで計算されたエネルギー(eV)
+
+    .. attribute:: move_chemical_symbols
+
+        動かす原子の元素のリスト
+        
+    .. attribute:: move_positions
+
+        動かす原子の座標
+
+    .. attribute:: frozen_chemical_symbols
+
+        FrozenAtomsの元素のリスト
+
+    .. attribute:: frozen_positions
+
+        FrozenAtomsの座標   
+
+
+TS クラス
+==========
+.. autoclass:: matlanticgrrm.grrmdata.TS
+
+    .. attribute:: atoms
+
+        ase.Atomsオブジェクトを要素とするリスト.
+
+    .. attribute:: connections
+
+        GRRMで計算されたCONNECTIONS
+
+    .. attribute:: energies
+
+        GRRMで計算されたエネルギー(eV)
+
+    .. attribute:: move_chemical_symbols
+
+        動かす原子の元素のリスト
+        
+    .. attribute:: move_positions
+
+        動かす原子の座標
+
+    .. attribute:: frozen_chemical_symbols
+
+        FrozenAtomsの元素のリスト
+
+    .. attribute:: frozen_positions
+
+        FrozenAtomsの座標   
+
+
+PT クラス
+==========
+.. autoclass:: matlanticgrrm.grrmdata.PT
+
+    :class:`TS` クラスと同じPoperty
+

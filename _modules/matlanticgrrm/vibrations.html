@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>matlanticgrrm.vibrations &mdash; MatlanticGrrm 2020/08/14 ドキュメント</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/ase.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/translations.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> MatlanticGrrm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../src/quick_start.html">クイックスタート</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../src/tips.html">Tips</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MatlanticGrrm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">モジュールコード</a> &raquo;</li>
+      <li>matlanticgrrm.vibrations</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>matlanticgrrm.vibrations のソースコード</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">ase</span>
+<span class="kn">from</span> <span class="nn">ase.vibrations</span> <span class="kn">import</span> <span class="n">Vibrations</span>
+<span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">reset_logger</span><span class="p">,</span><span class="n">add_filehandler</span>
+<span class="kn">import</span> <span class="nn">matlanticgrrm.atomslist</span> <span class="k">as</span> <span class="nn">ma</span>
+
+<span class="kn">from</span> <span class="nn">plotly.subplots</span> <span class="kn">import</span> <span class="n">make_subplots</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">find_peaks</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span><span class="nn">os</span><span class="o">,</span><span class="nn">math</span><span class="o">,</span><span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">tqdm.notebook</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">getLogger</span><span class="p">,</span><span class="n">StreamHandler</span><span class="p">,</span><span class="n">FileHandler</span><span class="p">,</span><span class="n">Formatter</span><span class="p">,</span><span class="n">DEBUG</span><span class="p">,</span><span class="n">INFO</span><span class="p">,</span><span class="n">WARNING</span><span class="p">,</span><span class="n">ERROR</span><span class="p">,</span><span class="n">CRITICAL</span>
+
+<div class="viewcode-block" id="ListVibrations"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.ListVibrations">[ドキュメント]</a><span class="k">class</span> <span class="nc">ListVibrations</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;ase.vibrations.VibrationsをAtomsのリストでも使えるように拡張したクラス</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    </span>
+<span class="sd">    atoms_list: list of ase.Atoms</span>
+<span class="sd">        Atomsのリスト</span>
+<span class="sd">    errorlog: str </span>
+<span class="sd">        logのファイルパス</span>
+<span class="sd">    indexex: list of int</span>
+<span class="sd">        計算対象をリストで指定</span>
+<span class="sd">    indices: list of int</span>
+<span class="sd">        動かす原子をリストで指定</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atoms_list</span><span class="p">,</span><span class="n">errorlog</span><span class="p">,</span><span class="n">indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;vib&#39;</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">nfree</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span> <span class="o">=</span> <span class="n">atoms_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorlog</span> <span class="o">=</span> <span class="n">errorlog</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indexes</span> <span class="o">=</span> <span class="n">indexes</span> <span class="k">if</span> <span class="n">indexes</span> <span class="k">else</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indices</span> <span class="o">=</span> <span class="n">indices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">=</span> <span class="n">delta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nfree</span> <span class="o">=</span> <span class="n">nfree</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vib</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Optimizerを使用するためには__iter__を実装する必要がある&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Optimizerを使用するためには__len__を実装する必要がある&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">mk_vib_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atoms</span><span class="p">,</span><span class="n">foldername</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Vibrations</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">foldername</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">delta</span><span class="p">,</span> <span class="n">nfree</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nfree</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_start_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">reset_logger</span><span class="p">()</span> <span class="c1">#loggerをリセット  </span>
+        <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;stop.log&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;stop.log&quot;</span><span class="p">,</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span> <span class="c1">#n番目から計算を始める</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;stop.log&quot;</span><span class="p">)</span>
+            <span class="n">add_filehandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span><span class="s2">&quot;a&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">errorlog</span><span class="p">,</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">add_filehandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">errorlog</span><span class="p">,</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">n</span>
+    
+<div class="viewcode-block" id="ListVibrations.run"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.ListVibrations.run">[ドキュメント]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;計算を実行する    </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_number</span><span class="p">()</span> <span class="c1">#n番目から計算を始める</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vib</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="p">)</span><span class="o">==</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">vib</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_list</span><span class="p">[</span><span class="n">n</span><span class="p">:]),</span><span class="n">start</span><span class="o">=</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;stop.log&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">write_steplog</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;stop.log&quot;</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                    <span class="n">write_steplog</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">continue</span>
+            <span class="n">write_steplog</span> <span class="o">=</span> <span class="kc">False</span>  
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;i=</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> index未指定 return 1&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">atoms</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;i=</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> objectが存在しない return 2&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">vib</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mk_vib_func</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                    <span class="n">vib</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+                    <span class="c1">#runまで到達したら</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vib</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;i=</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> 完了 return 0&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_obj</span><span class="p">,</span> <span class="n">exc_tb</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+                    <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">exc_tb</span><span class="o">.</span><span class="n">tb_frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;i=</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">exc_type</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">exc_tb</span><span class="o">.</span><span class="n">tb_lineno</span><span class="si">}</span><span class="s2"> return 5&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
+                    
+                    
+<div class="viewcode-block" id="ListVibrations.clean"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.ListVibrations.clean">[ドキュメント]</a>    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">empty_files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;self.nameのフォルダ内の全てjsonファイルを削除する&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">vib_obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">vib_obj</span><span class="p">:</span>
+                <span class="n">vib_obj</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="n">empty_files</span><span class="o">=</span><span class="n">empty_files</span><span class="p">,</span><span class="n">combined</span><span class="o">=</span><span class="n">combined</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="ListVibrations.summary"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.ListVibrations.summary">[ドキュメント]</a>    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">html</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">pkl</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;振動数,振動モードの表をhtmlに保存する</span>
+<span class="sd">        </span>
+<span class="sd">        虚振動のindex番号をpickeファイルに保存することもできる.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        </span>
+<span class="sd">        html: str or pathlib.Path</span>
+<span class="sd">            htmlの保存先のパス</span>
+<span class="sd">        pkl: str or pathlib.Path</span>
+<span class="sd">            pickleの保存先のパス</span>
+<span class="sd">            </span>
+<span class="sd">        Return:</span>
+<span class="sd">            虚振動のindex番号を格納したリスト.虚振動がない場合,要素はNoneとなる</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sample_n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="p">)</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">sample_n</span><span class="o">/</span><span class="n">cols</span><span class="p">)</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="p">[[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;table&quot;</span><span class="p">}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cols</span><span class="p">)]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rows</span><span class="p">)]</span>
+        <span class="n">subplot_titles</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;TS</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sample_n</span><span class="p">)]</span>
+        
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">make_subplots</span><span class="p">(</span>
+            <span class="n">rows</span><span class="o">=</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span>
+            <span class="n">specs</span><span class="o">=</span><span class="n">specs</span><span class="p">,</span>
+            <span class="n">subplot_titles</span> <span class="o">=</span> <span class="n">subplot_titles</span>
+            <span class="p">)</span>
+        
+        <span class="n">div_sample</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sample_n</span><span class="p">,</span> <span class="n">cols</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;データをcol分割する&quot;&quot;&quot;</span>
+            <span class="n">div_sample</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">+</span><span class="n">cols</span><span class="p">])</span> 
+        <span class="k">def</span> <span class="nf">add_table</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">,</span><span class="n">fill_color</span><span class="p">):</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+                <span class="n">go</span><span class="o">.</span><span class="n">Table</span><span class="p">(</span>
+                    <span class="n">header</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span>
+                                <span class="n">fill</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span><span class="s2">&quot;rgb(68,114,196)&quot;</span><span class="p">},</span>
+                                <span class="n">font</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span><span class="s2">&quot;rgb(255,255,255)&quot;</span><span class="p">,</span><span class="s2">&quot;family&quot;</span> <span class="p">:</span> <span class="s2">&quot;Arial&quot;</span><span class="p">},</span>
+                                <span class="n">align</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">),</span>
+                    <span class="n">cells</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;&lt;b&gt;#&lt;/b&gt;&quot;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;&lt;b&gt;meV&lt;/b&gt;&quot;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;&lt;b&gt;cm^-1&lt;/b&gt;&quot;</span><span class="p">]],</span>
+                               <span class="n">fill</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span><span class="s2">&quot;rgb(233,235,245)&quot;</span><span class="p">},</span>
+                               <span class="n">fill_color</span> <span class="o">=</span> <span class="n">fill_color</span><span class="p">,</span>
+                               <span class="n">font</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;family&quot;</span><span class="p">:</span><span class="s2">&quot;Arial&quot;</span><span class="p">},</span>
+                               <span class="n">align</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="n">row</span><span class="o">=</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="n">col</span><span class="p">)</span>
+        
+        <span class="n">i_idx</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1">#虚数振動のidx</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row_vib</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">div_sample</span><span class="p">,</span><span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="p">,</span> <span class="n">vib_obj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row_vib</span><span class="p">,</span><span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">vib_obj</span><span class="p">:</span>
+                    <span class="n">vib_data</span> <span class="o">=</span> <span class="n">vib_obj</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
+                    <span class="n">text</span> <span class="o">=</span> <span class="n">vib_data</span><span class="o">.</span><span class="n">tabulate</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="c1">#summaryを取得</span>
+                    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                        <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">text</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">]]),</span>
+                        <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&lt;b&gt;#&lt;/b&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;b&gt;meV&lt;/b&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;b&gt;cm^-1&lt;/b&gt;&#39;</span><span class="p">])</span>
+                    <span class="n">imaginary_vib_list</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;&lt;b&gt;cm^-1&lt;/b&gt;&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="c1">#虚振動を含む行番号を抽出</span>
+                    <span class="n">imaginary_vib_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">imaginary_vib_list</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]]</span> <span class="c1">#1~4は無視</span>
+                    
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">imaginary_vib_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1">#虚振動が1つだげ存在するとき</span>
+                        <span class="n">i_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">imaginary_vib_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">fill_color</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot;rgb(233,235,245)&quot;</span> <span class="k">if</span> <span class="n">i</span><span class="o">!=</span><span class="n">imaginary_vib_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="s2">&quot;rgb(255,155,155)&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))]]</span><span class="o">*</span><span class="mi">3</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">fill_color</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot;rgb(233,235,245)&quot;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))]]</span><span class="o">*</span><span class="mi">3</span>
+                        <span class="n">i_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                    <span class="n">add_table</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">fill_color</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">i_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                    
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">700</span><span class="o">*</span><span class="n">rows</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                          <span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;振動&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">html</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            
+        <span class="k">if</span> <span class="n">pkl</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pkl</span><span class="p">,</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">i_idx</span><span class="p">,</span><span class="n">f</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">i_idx</span></div>
+    
+    <span class="k">def</span> <span class="nf">combine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">fold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">get_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">get_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">get_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">get_vibrations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">iterdisplace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">iterimages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">write_dos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">write_jmol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+    
+<div class="viewcode-block" id="ListVibrations.write_mode"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.ListVibrations.write_mode">[ドキュメント]</a>    <span class="k">def</span> <span class="nf">write_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kT</span><span class="o">=</span><span class="mf">0.02585199101165164</span><span class="p">,</span> <span class="n">nimages</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;trajファイルを作成する</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">        </span>
+<span class="sd">        n: list of int</span>
+<span class="sd">            振動モードのindex番号を格納したリスト</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">save_path</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">vib_obj</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">vib_obj</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">==</span><span class="nb">int</span><span class="p">:</span>
+                <span class="n">vib_obj</span><span class="o">.</span><span class="n">write_mode</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">kT</span><span class="p">,</span><span class="n">nimages</span><span class="p">)</span>
+                <span class="n">save_path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">vib_obj</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.traj&quot;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">save_path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">save_path</span></div></div>
+                
+<div class="viewcode-block" id="vib_graph"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.vib_graph">[ドキュメント]</a><span class="k">def</span> <span class="nf">vib_graph</span><span class="p">(</span><span class="n">traj_list</span><span class="p">,</span><span class="n">calculator</span><span class="p">,</span><span class="n">html</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">pkl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;振動のエネルギーダイアグラムを作成し,htmlに保存する.</span>
+<span class="sd">    </span>
+<span class="sd">    TSと考えられるindex番号をpickelファイルに保存することもできる.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    </span>
+<span class="sd">    traj_list: list of Trajectory</span>
+<span class="sd">        ase.io.trajectory.Trajectoryオブジェクトのリスト</span>
+<span class="sd">    calculator: function object</span>
+<span class="sd">        aseのcalculatorを返す関数</span>
+<span class="sd">    html: str or pathlib.Path</span>
+<span class="sd">        htmlの保存先のパス</span>
+<span class="sd">    pkl: str or pathlib.Path</span>
+<span class="sd">        pickleの保存先のパス</span>
+<span class="sd">    indexes: list of int</span>
+<span class="sd">        グラフを作成する対象</span>
+<span class="sd">        </span>
+<span class="sd">    Return:</span>
+<span class="sd">        TSと考えられるindex番号を格納したリスト.TSがない場合,要素はNoneとなる</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">indexes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">indexes</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">traj_list</span><span class="p">))]</span>
+        
+    <span class="n">energiess</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">vib_traj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">traj_list</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">vib_traj</span> <span class="ow">and</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">indexes</span><span class="p">:</span>
+            <span class="n">energies</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">vib_traj</span><span class="p">:</span>
+                <span class="n">i</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="n">calculator</span><span class="p">()</span>
+                <span class="n">energies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">())</span>
+            <span class="n">energiess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">energies</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">energiess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            
+    <span class="n">sample_n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">energiess</span><span class="p">)</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="mi">3</span> <span class="c1">#3列</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">sample_n</span><span class="o">/</span><span class="n">cols</span><span class="p">)</span>
+    <span class="n">subplot_titles</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;TS</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sample_n</span><span class="p">)]</span>
+    
+    <span class="sd">&quot;&quot;&quot;データをcol個ずつに分割する&quot;&quot;&quot;</span>
+    <span class="n">div_sample</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sample_n</span><span class="p">,</span> <span class="n">cols</span><span class="p">):</span>
+        <span class="n">div_sample</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">energiess</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">+</span><span class="n">cols</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">add_fig</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">,</span><span class="n">color</span><span class="p">):</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                                 <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)),</span>
+                      <span class="n">row</span><span class="o">=</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="n">col</span><span class="p">)</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">make_subplots</span><span class="p">(</span>
+        <span class="n">rows</span><span class="o">=</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span>
+        <span class="n">subplot_titles</span><span class="o">=</span><span class="n">subplot_titles</span><span class="p">)</span>
+    
+    <span class="n">idx</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row_data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">div_sample</span><span class="p">,</span><span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row_data</span><span class="p">,</span><span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))]</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">data</span>
+                <span class="n">add_fig</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+                <span class="n">div_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">3</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span> <span class="c1">#3分割した内，真ん中のデータを抽出</span>
+                <span class="n">peaks_i</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span><span class="n">div_data</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peaks_i</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1">#ピークが1つだけあれば</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="n">peaks_i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">div_data</span><span class="p">)</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+                    <span class="n">add_fig</span><span class="p">(</span><span class="n">fig</span><span class="p">,[</span><span class="n">x</span><span class="p">],[</span><span class="n">y</span><span class="p">],</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                    <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="o">*</span><span class="n">rows</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                      <span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;エネルギーダイアグラム&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">html</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        
+    <span class="k">if</span> <span class="n">pkl</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pkl</span><span class="p">,</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="n">f</span><span class="p">)</span>
+            
+    <span class="k">return</span> <span class="n">idx</span></div>
+
+            
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Kato Taisetsu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
