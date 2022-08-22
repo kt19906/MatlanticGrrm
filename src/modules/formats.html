@@ -53,7 +53,11 @@
 <li class="toctree-l2"><a class="reference internal" href="log.html">Log</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">チュートリアル</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tips.html">Tips</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other.html">その他</a></li>
 </ul>
 
         </div>
@@ -105,9 +109,52 @@
     text-align: unset;
 }
 </style>
-<section id="atoms">
-<h1>Atomsリストの保存・読み込み<a class="headerlink" href="#atoms" title="この見出しへのパーマリンク"></a></h1>
-<p>cff</p>
+<section id="module-matlanticgrrm.io.formats">
+<span id="atoms"></span><h1>Atomsリストの保存・読み込み<a class="headerlink" href="#module-matlanticgrrm.io.formats" title="この見出しへのパーマリンク"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="matlanticgrrm.io.formats.lread">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.io.formats.</span></span><span class="sig-name descname"><span class="pre">lread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/io/formats.html#lread"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.io.formats.lread" title="この定義へのパーマリンク"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="matlanticgrrm.io.formats.lwrite">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.io.formats.</span></span><span class="sig-name descname"><span class="pre">lwrite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/io/formats.html#lwrite"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.io.formats.lwrite" title="この定義へのパーマリンク"></a></dt>
+<dd><p>atoms_listからtrajファイルを作成する</p>
+<p>通常はASEのwriteを使用すれば良いが, listの要素にNoneが含まれている場合この関数を使用する.
+Noneの要素の部分には空のAtomsを挿入される.</p>
+<p>Parameters:</p>
+<dl class="simple">
+<dt>filename: str or path object</dt><dd><p>trajファイルのパス</p>
+</dd>
+<dt>atoms_list: str or path object</dt><dd><p>保存するAomtsリストの1次元リストまたは2次元リスト</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>Noneの要素の部分には空のAtomsを挿入される. 空のAtomsはASEの仕様上, 真偽値でFalseを返すので
+lwriteで作成したtrajファイルからatoms_listを再生するには</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ase.io</span> <span class="kn">import</span> <span class="n">iread</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">atoms_list</span> <span class="o">=</span><span class="n">z</span> <span class="p">[</span><span class="n">atoms</span> <span class="k">if</span> <span class="n">atoms</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="n">iread</span><span class="p">(</span><span class="s2">&quot;*traj&quot;</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>とすれば良い</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>atoms_listがimages(Atomsの2次元リスト)の場合はfilenameと同じ名前のpickleファイルも作成される.</p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="matlanticgrrm.io.formats.traj2cif">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.io.formats.</span></span><span class="sig-name descname"><span class="pre">traj2cif</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/io/formats.html#traj2cif"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.io.formats.traj2cif" title="この定義へのパーマリンク"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="matlanticgrrm.io.formats.traj2xyz">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.io.formats.</span></span><span class="sig-name descname"><span class="pre">traj2xyz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/io/formats.html#traj2xyz"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.io.formats.traj2xyz" title="この定義へのパーマリンク"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 

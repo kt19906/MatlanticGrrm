@@ -13,6 +13,10 @@ MatlanticGrrm's documentation
    src/modules
    src/tutorial
    src/tips
+
+.. toctree::
+   :hidden:
+   
    src/other
 
 Indices and tables

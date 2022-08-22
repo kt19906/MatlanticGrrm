@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>matlanticgrrm.io.formats &mdash; MatlanticGrrm 2020/08/14 ドキュメント</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/ase.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/translations.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../../genindex.html" />
+    <link rel="search" title="検索" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> MatlanticGrrm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/quick_start.html">クイックスタート</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/tutorial.html">チュートリアル</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/tips.html">Tips</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../src/other.html">その他</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MatlanticGrrm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">モジュールコード</a> &raquo;</li>
+      <li>matlanticgrrm.io.formats</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>matlanticgrrm.io.formats のソースコード</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ase.io</span> <span class="kn">import</span> <span class="n">iread</span><span class="p">,</span> <span class="n">read</span><span class="p">,</span> <span class="n">write</span>
+<span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atoms</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<div class="viewcode-block" id="lread"><a class="viewcode-back" href="../../../src/modules/formats.html#matlanticgrrm.io.formats.lread">[ドキュメント]</a><span class="k">def</span> <span class="nf">lread</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span><span class="n">pkl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">status</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="n">pkl</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pkl</span><span class="p">,</span><span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">l</span><span class="p">,</span><span class="n">n</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_read_with_status</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">status</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_read_images</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">status</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;trajファイルのみでatomsリストを再生する.statusを指定できない.&quot;&quot;&quot;</span>
+        <span class="n">atoms_list</span> <span class="o">=</span> <span class="n">_read_without_status</span><span class="p">(</span><span class="n">traj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="n">atoms_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">atoms_list</span></div>
+
+<span class="k">def</span> <span class="nf">_read_without_status</span><span class="p">(</span><span class="n">traj</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">atoms</span> <span class="k">if</span> <span class="n">atoms</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="n">iread</span><span class="p">(</span><span class="n">traj</span><span class="p">)]</span>
+
+<span class="k">def</span> <span class="nf">_read_with_status</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">status</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">atoms</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">status</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">iread</span><span class="p">(</span><span class="n">traj</span><span class="p">))]</span>
+
+<span class="k">def</span> <span class="nf">_read_images</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">status</span><span class="p">):</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">iread</span><span class="p">(</span><span class="n">traj</span><span class="p">)</span> <span class="c1"># atomsを返すジェネレーター</span>
+    <span class="n">imagess</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+        <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">status</span><span class="p">:</span> <span class="c1"># 収束済み以外はNoneにする</span>
+                <span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
+                <span class="n">images</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">imagess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">imagess</span>
+        
+<span class="k">def</span> <span class="nf">lwrite</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">atoms_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;atoms_listからtrajファイルを作成する</span>
+<span class="sd">    </span>
+<span class="sd">    通常はASEのwriteを使用すれば良いが, listの要素にNoneが含まれている場合この関数を使用する.</span>
+<span class="sd">    Noneの要素の部分には空のAtomsを挿入される.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    </span>
+<span class="sd">    filename: str or path object</span>
+<span class="sd">        trajファイルのパス</span>
+<span class="sd">    atoms_list: str or path object</span>
+<span class="sd">        保存するAomtsリストの1次元リストまたは2次元リスト</span>
+<span class="sd">    </span>
+<span class="sd">    Note:</span>
+<span class="sd">        Noneの要素の部分には空のAtomsを挿入される. 空のAtomsはASEの仕様上, 真偽値でFalseを返すので</span>
+<span class="sd">        lwriteで作成したtrajファイルからatoms_listを再生するには</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; from ase.io import iread</span>
+<span class="sd">        &gt;&gt;&gt; atoms_list =z [atoms if atoms else None for atoms in iread(&quot;*traj&quot;)]</span>
+<span class="sd">        </span>
+<span class="sd">        とすれば良い</span>
+<span class="sd">        </span>
+<span class="sd">    Note:</span>
+<span class="sd">        atoms_listがimages(Atomsの2次元リスト)の場合はfilenameと同じ名前のpickleファイルも作成される.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="n">atoms_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+                <span class="n">n_images</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+                <span class="n">_write_images_list</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">atoms_list</span><span class="p">,</span><span class="n">n_images</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_write_atoms_list</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">atoms_list</span><span class="p">)</span>
+        <span class="k">break</span>
+        
+<span class="k">def</span> <span class="nf">_write_atoms_list</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">atoms_list</span><span class="p">):</span>
+    <span class="n">atoms_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">atoms</span> <span class="k">if</span> <span class="n">atoms</span> <span class="k">else</span> <span class="n">Atoms</span><span class="p">()</span> <span class="k">for</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="n">atoms_list</span><span class="p">]</span>
+    <span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">atoms_list</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_write_images_list</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">atoms_list</span><span class="p">,</span><span class="n">n_images</span><span class="p">):</span>
+    <span class="n">flat_atoms_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">status_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">images</span> <span class="ow">in</span> <span class="n">atoms_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">images</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="n">images</span><span class="p">:</span>
+                <span class="n">flat_atoms_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+            <span class="n">status_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_images</span><span class="p">):</span>
+                <span class="n">flat_atoms_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Atoms</span><span class="p">())</span>
+            <span class="n">status_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">flat_atoms_list</span><span class="p">)</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.pickle&quot;</span><span class="p">,</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">((</span><span class="n">status_list</span><span class="p">,</span><span class="n">n_images</span><span class="p">),</span><span class="n">f</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">traj2cif</span><span class="p">(</span><span class="n">traj</span><span class="p">):</span>
+    <span class="n">traj_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">traj</span><span class="p">)</span>
+    <span class="n">atoms</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">traj_path</span><span class="p">)</span>
+    <span class="n">write</span><span class="p">(</span><span class="n">traj_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.cif&#39;</span><span class="p">),</span><span class="n">atoms</span><span class="p">)</span>
+    
+<span class="k">def</span> <span class="nf">traj2xyz</span><span class="p">(</span><span class="n">traj</span><span class="p">):</span>
+    <span class="n">traj_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">traj</span><span class="p">)</span>
+    <span class="n">atoms</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">traj_path</span><span class="p">)</span>
+    <span class="n">write</span><span class="p">(</span><span class="n">traj_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.xyz&#39;</span><span class="p">),</span><span class="n">atoms</span><span class="p">)</span>
+    
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Kato Taisetsu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
