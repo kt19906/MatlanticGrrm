@@ -7,8 +7,8 @@
 ListVibrations クラス
 =====================
 .. autoclass:: matlanticgrrm.vibrations.ListVibrations
-   :members:
+   :members: run, summary, write_mode
 
-vib_graph()
+vib_graphs()
 ===============
-.. autofunction:: matlanticgrrm.vibrations.vib_graph
+.. autofunction:: matlanticgrrm.vibrations.vib_graphs

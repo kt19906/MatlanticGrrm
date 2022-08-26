@@ -44,6 +44,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">クイックスタート</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#id2">構造最適化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#neb">NEB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vib">VIB</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
@@ -142,8 +143,8 @@
 <section id="neb">
 <h2>NEB<a class="headerlink" href="#neb" title="この見出しへのパーマリンク"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matlanticgrrm.atomslist</span> <span class="kn">import</span> <span class="n">set_calculator</span><span class="p">,</span> <span class="n">pfp_calculator</span>
-<span class="kn">from</span> <span class="nn">matlanticgrrm.optimize</span> <span class="kn">import</span> <span class="n">ListLFIRE</span>
-<span class="kn">from</span> <span class="nn">matlanticgrrm.neb</span> <span class="kn">import</span> <span class="n">ListLNEB</span>
+<span class="kn">from</span> <span class="nn">matlanticgrrm.optimize</span> <span class="kn">import</span> <span class="n">ListFIRE</span>
+<span class="kn">from</span> <span class="nn">matlanticgrrm.neb</span> <span class="kn">import</span> <span class="n">ListNEB</span>
 <span class="kn">from</span> <span class="nn">matlanticgrrm.grrmdata</span> <span class="kn">import</span> <span class="n">get_connections</span>
 <span class="kn">from</span> <span class="nn">matlanticgrrm.io</span> <span class="kn">import</span> <span class="n">lread</span>
 
@@ -172,6 +173,33 @@
 <div class="line-block">
 <div class="line">neb_graphsでエネルギーダイアグラム図はneb_graph.htmlに保存される.</div>
 <div class="line">自動でTSの位置を取得しneb_ts.trajに保存される.</div>
+</div>
+</section>
+<section id="vib">
+<h2>VIB<a class="headerlink" href="#vib" title="この見出しへのパーマリンク"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matlanticgrrm.visualize</span> <span class="kn">import</span> <span class="n">view</span><span class="p">,</span> <span class="n">view_images</span><span class="p">,</span> <span class="n">view_with_index</span>
+<span class="kn">from</span> <span class="nn">matlanticgrrm.atomslist</span> <span class="kn">import</span> <span class="n">pfp_calculator</span><span class="p">,</span><span class="n">set_calculator</span>
+<span class="kn">from</span> <span class="nn">matlanticgrrm.vibrations</span> <span class="kn">import</span> <span class="n">ListVibrations</span><span class="p">,</span> <span class="n">vib_graphs</span>
+<span class="kn">from</span> <span class="nn">matlanticgrrm.io</span> <span class="kn">import</span> <span class="n">lread</span><span class="p">,</span> <span class="n">lwrite</span>
+<span class="kn">from</span> <span class="nn">ase.io</span> <span class="kn">import</span> <span class="n">read</span><span class="p">,</span><span class="n">iread</span><span class="p">,</span><span class="n">write</span>
+
+<span class="n">neb_ts</span> <span class="o">=</span> <span class="n">lread</span><span class="p">(</span><span class="s2">&quot;*.traj&quot;</span><span class="p">)</span> <span class="c1"># TS構造をインポート</span>
+
+<span class="n">set_calculator</span><span class="p">(</span><span class="n">neb_ts</span><span class="p">,</span><span class="n">pfp_calculator</span><span class="p">)</span>
+
+<span class="n">view_with_index</span><span class="p">(</span><span class="n">neb_ts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">]</span> <span class="c1"># Vibration計算で動かす原子のindex番号を控える</span>
+
+<span class="n">vib</span> <span class="o">=</span> <span class="n">ListVibrations</span><span class="p">(</span><span class="n">neb_ts</span><span class="p">,</span><span class="n">errorlog</span><span class="o">=</span><span class="s2">&quot;VIB.log&quot;</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="n">indices</span><span class="p">)</span>
+
+<span class="n">vib</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="n">vib</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">html</span><span class="o">=</span><span class="s2">&quot;vib_table.html&quot;</span><span class="p">);</span>
+
+<span class="c1"># n_list=Noneの時は虚振動の trajファイルを作成する</span>
+<span class="c1"># 特定のモードのtrajを作成したい場合index番号を入力</span>
+<span class="n">vib</span><span class="o">.</span><span class="n">write_mode</span><span class="p">(</span><span class="n">n_list</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
 </div>
 </section>
 </section>

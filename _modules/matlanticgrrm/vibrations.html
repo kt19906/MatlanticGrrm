@@ -73,6 +73,8 @@
              
   <h1>matlanticgrrm.vibrations のソースコード</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">ase</span>
+<span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atoms</span>
+<span class="kn">from</span> <span class="nn">ase.io</span> <span class="kn">import</span> <span class="n">write</span>
 <span class="kn">from</span> <span class="nn">ase.vibrations</span> <span class="kn">import</span> <span class="n">Vibrations</span>
 <span class="kn">from</span> <span class="nn">.log</span> <span class="kn">import</span> <span class="n">reset_logger</span><span class="p">,</span><span class="n">add_filehandler</span>
 <span class="kn">import</span> <span class="nn">matlanticgrrm.atomslist</span> <span class="k">as</span> <span class="nn">ma</span>
@@ -89,18 +91,14 @@
 <span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">getLogger</span><span class="p">,</span><span class="n">StreamHandler</span><span class="p">,</span><span class="n">FileHandler</span><span class="p">,</span><span class="n">Formatter</span><span class="p">,</span><span class="n">DEBUG</span><span class="p">,</span><span class="n">INFO</span><span class="p">,</span><span class="n">WARNING</span><span class="p">,</span><span class="n">ERROR</span><span class="p">,</span><span class="n">CRITICAL</span>
 
 <div class="viewcode-block" id="ListVibrations"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.ListVibrations">[ドキュメント]</a><span class="k">class</span> <span class="nc">ListVibrations</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;ase.vibrations.VibrationsをAtomsのリストでも使えるように拡張したクラス</span>
+    <span class="sd">&quot;&quot;&quot;ase.vibrations.VibrationsをAtomsのリストでも使えるようにしたもの</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
 <span class="sd">    </span>
-<span class="sd">    atoms_list: list of ase.Atoms</span>
-<span class="sd">        Atomsのリスト</span>
-<span class="sd">    errorlog: str </span>
-<span class="sd">        logのファイルパス</span>
-<span class="sd">    indexex: list of int</span>
-<span class="sd">        計算対象をリストで指定</span>
-<span class="sd">    indices: list of int</span>
-<span class="sd">        動かす原子をリストで指定</span>
+<span class="sd">    atoms_list (list(Atoms)) : Atomsのリスト</span>
+<span class="sd">    errorlog　(str) : logのファイルパス</span>
+<span class="sd">    indexex (list) : 計算対象をリストで指定　&lt;--ここまでがListVibrations特有の引数</span>
+<span class="sd">    indices (list) :　動かす原子をリストで指定 &lt;-- ここからがVibrationsの引数aseのDocumentを参照</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atoms_list</span><span class="p">,</span><span class="n">errorlog</span><span class="p">,</span><span class="n">indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;vib&#39;</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">nfree</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
@@ -143,7 +141,16 @@
         <span class="k">return</span> <span class="n">n</span>
     
 <div class="viewcode-block" id="ListVibrations.run"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.ListVibrations.run">[ドキュメント]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;計算を実行する    </span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        | logの内容[logレベル]</span>
+<span class="sd">        | {1} : index未指定 [INFO]</span>
+<span class="sd">        | {2} : Atomsのオブジェクトが存在しない [INFO]</span>
+<span class="sd">        | {5} : エラー [CRITICAL]</span>
+<span class="sd">        </span>
+<span class="sd">        Note:</span>
+<span class="sd">            Imaginary_Frequency.htmlとImaginary_Freq_Idx.txtを出力する.</span>
+<span class="sd">            実行中のnotebookと同じディレクトリにstop.logを作成すると計算を中断する.</span>
+<span class="sd">            </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_number</span><span class="p">()</span> <span class="c1">#n番目から計算を始める</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vib</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="p">)</span><span class="o">==</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">vib</span>
@@ -175,27 +182,21 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
                     
                     
-<div class="viewcode-block" id="ListVibrations.clean"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.ListVibrations.clean">[ドキュメント]</a>    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">empty_files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">empty_files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;self.nameのフォルダ内の全てjsonファイルを削除する&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">vib_obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">vib_obj</span><span class="p">:</span>
-                <span class="n">vib_obj</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="n">empty_files</span><span class="o">=</span><span class="n">empty_files</span><span class="p">,</span><span class="n">combined</span><span class="o">=</span><span class="n">combined</span><span class="p">)</span></div>
+                <span class="n">vib_obj</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="n">empty_files</span><span class="o">=</span><span class="n">empty_files</span><span class="p">,</span><span class="n">combined</span><span class="o">=</span><span class="n">combined</span><span class="p">)</span>
     
-<div class="viewcode-block" id="ListVibrations.summary"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.ListVibrations.summary">[ドキュメント]</a>    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">html</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">pkl</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;振動数,振動モードの表をhtmlに保存する</span>
-<span class="sd">        </span>
-<span class="sd">        虚振動のindex番号をpickeファイルに保存することもできる.</span>
+<div class="viewcode-block" id="ListVibrations.summary"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.ListVibrations.summary">[ドキュメント]</a>    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">html</span><span class="o">=</span><span class="s2">&quot;vib_table.html&quot;</span><span class="p">,</span><span class="n">pkl</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters:</span>
 <span class="sd">        </span>
-<span class="sd">        html: str or pathlib.Path</span>
-<span class="sd">            htmlの保存先のパス</span>
-<span class="sd">        pkl: str or pathlib.Path</span>
-<span class="sd">            pickleの保存先のパス</span>
-<span class="sd">            </span>
-<span class="sd">        Return:</span>
-<span class="sd">            虚振動のindex番号を格納したリスト.虚振動がない場合,要素はNoneとなる</span>
-<span class="sd">        </span>
+<span class="sd">        html: str or path object</span>
+<span class="sd">            htmlパス.htmlに表を保存する. Noneの場合は標準出力だが,数の多い場合は推奨しない</span>
+<span class="sd">        pkl:</span>
+<span class="sd">            pickleパス.指定した場合,各構造の虚数振動のモード番号をリストとしてpickleに保存する.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sample_n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="p">)</span>
         <span class="n">cols</span> <span class="o">=</span> <span class="mi">3</span>
@@ -228,7 +229,7 @@
                 <span class="p">),</span>
                 <span class="n">row</span><span class="o">=</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="n">col</span><span class="p">)</span>
         
-        <span class="n">i_idx</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1">#虚数振動のidx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">i_idx</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1">#虚数振動のidx</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row_vib</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">div_sample</span><span class="p">,</span><span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j</span> <span class="p">,</span> <span class="n">vib_obj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row_vib</span><span class="p">,</span><span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">vib_obj</span><span class="p">:</span>
@@ -241,14 +242,14 @@
                     <span class="n">imaginary_vib_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">imaginary_vib_list</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]]</span> <span class="c1">#1~4は無視</span>
                     
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">imaginary_vib_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1">#虚振動が1つだげ存在するとき</span>
-                        <span class="n">i_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">imaginary_vib_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">i_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">imaginary_vib_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                         <span class="n">fill_color</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot;rgb(233,235,245)&quot;</span> <span class="k">if</span> <span class="n">i</span><span class="o">!=</span><span class="n">imaginary_vib_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="s2">&quot;rgb(255,155,155)&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))]]</span><span class="o">*</span><span class="mi">3</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">fill_color</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot;rgb(233,235,245)&quot;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))]]</span><span class="o">*</span><span class="mi">3</span>
-                        <span class="n">i_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">i_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
                     <span class="n">add_table</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">fill_color</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">i_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">i_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
                     
         <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">700</span><span class="o">*</span><span class="n">rows</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
                           <span class="n">title_text</span><span class="o">=</span><span class="s2">&quot;振動&quot;</span><span class="p">)</span>
@@ -260,9 +261,7 @@
             
         <span class="k">if</span> <span class="n">pkl</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pkl</span><span class="p">,</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">i_idx</span><span class="p">,</span><span class="n">f</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="n">i_idx</span></div>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">i_idx</span><span class="p">,</span><span class="n">f</span><span class="p">)</span></div>
     
     <span class="k">def</span> <span class="nf">combine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
@@ -297,57 +296,53 @@
     <span class="k">def</span> <span class="nf">write_jmol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
     
-<div class="viewcode-block" id="ListVibrations.write_mode"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.ListVibrations.write_mode">[ドキュメント]</a>    <span class="k">def</span> <span class="nf">write_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kT</span><span class="o">=</span><span class="mf">0.02585199101165164</span><span class="p">,</span> <span class="n">nimages</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+<div class="viewcode-block" id="ListVibrations.write_mode"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.ListVibrations.write_mode">[ドキュメント]</a>    <span class="k">def</span> <span class="nf">write_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">savename</span><span class="o">=</span><span class="s2">&quot;vib_all&quot;</span><span class="p">,</span> <span class="n">kT</span><span class="o">=</span><span class="mf">0.02585199101165164</span><span class="p">,</span> <span class="n">nimages</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;trajファイルを作成する</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters:</span>
 <span class="sd">        </span>
-<span class="sd">        n: list of int</span>
-<span class="sd">            振動モードのindex番号を格納したリスト</span>
+<span class="sd">        n_list: list of integer</span>
+<span class="sd">            | 各構造のtrajとして書き出したい振動モードをリストで与える.</span>
+<span class="sd">            | Noneの場合, 虚振動を自動判断する.</span>
+<span class="sd">        savename: str</span>
+<span class="sd">            保存ファイル名（拡張子なし）</span>
+<span class="sd">            </span>
+<span class="sd">        Note:</span>
+<span class="sd">            n_list=Noneを使う場合,事前にsummary()を実行しておく必要がある.</span>
+<span class="sd">        </span>
+<span class="sd">        その他の引数はASEを参照</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">save_path</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">vib_obj</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">vib_obj</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">==</span><span class="nb">int</span><span class="p">:</span>
-                <span class="n">vib_obj</span><span class="o">.</span><span class="n">write_mode</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">kT</span><span class="p">,</span><span class="n">nimages</span><span class="p">)</span>
-                <span class="n">save_path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">vib_obj</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.traj&quot;</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">save_path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">save_path</span></div></div>
-                
-<div class="viewcode-block" id="vib_graph"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.vib_graph">[ドキュメント]</a><span class="k">def</span> <span class="nf">vib_graph</span><span class="p">(</span><span class="n">traj_list</span><span class="p">,</span><span class="n">calculator</span><span class="p">,</span><span class="n">html</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">pkl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;振動のエネルギーダイアグラムを作成し,htmlに保存する.</span>
+        <span class="k">if</span> <span class="n">n_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">i_idx</span>
+
+        <span class="n">status_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">Trajectory</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">savename</span><span class="si">}</span><span class="s2">.traj&quot;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">traj</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,(</span><span class="n">n</span><span class="p">,</span><span class="n">vib_obj</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">n_list</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">vib</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span> <span class="c1"># Noneの要素は受け付けない</span>
+                    <span class="n">status_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">n</span> <span class="o">%=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vib_obj</span><span class="o">.</span><span class="n">get_energies</span><span class="p">())</span>            
+                    <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="p">(</span><span class="n">vib_obj</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span><span class="o">.</span><span class="n">iter_animated_mode</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">temperature</span><span class="o">=</span><span class="n">kT</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="n">nimages</span><span class="p">)):</span>
+                        <span class="n">traj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span> <span class="c1"># 要素がNoneの場合は空のAtomsを挿入する</span>
+                    <span class="n">status_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nimages</span><span class="p">):</span>
+                        <span class="n">traj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">Atoms</span><span class="p">())</span>
+                        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">savename</span><span class="si">}</span><span class="s2">.pickle&quot;</span><span class="p">,</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">((</span><span class="n">status_list</span><span class="p">,</span><span class="n">nimages</span><span class="p">),</span><span class="n">f</span><span class="p">)</span></div></div>
+                                 
+<div class="viewcode-block" id="vib_graphs"><a class="viewcode-back" href="../../src/modules/vibrations.html#matlanticgrrm.vibrations.vib_graphs">[ドキュメント]</a><span class="k">def</span> <span class="nf">vib_graphs</span><span class="p">(</span><span class="n">imagess</span><span class="p">,</span><span class="n">html</span><span class="o">=</span><span class="s2">&quot;vib_graph.html&quot;</span><span class="p">,</span><span class="n">is_traj</span><span class="o">=</span><span class="s2">&quot;Reverse.traj&quot;</span><span class="p">,</span><span class="n">fs_traj</span><span class="o">=</span><span class="s2">&quot;Forward.traj&quot;</span><span class="p">,</span><span class="n">ts_traj</span><span class="o">=</span><span class="s2">&quot;TS.traj&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    </span>
-<span class="sd">    TSと考えられるindex番号をpickelファイルに保存することもできる.</span>
+<span class="sd">    | Reverse.traj,Forward.traj,TS.trajが作成される.</span>
+<span class="sd">    | Reverse.traj,Forward.trajは構造最適化(IRC)を行なうことで始構造, 終構造となる.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
 <span class="sd">    </span>
-<span class="sd">    traj_list: list of Trajectory</span>
-<span class="sd">        ase.io.trajectory.Trajectoryオブジェクトのリスト</span>
-<span class="sd">    calculator: function object</span>
-<span class="sd">        aseのcalculatorを返す関数</span>
-<span class="sd">    html: str or pathlib.Path</span>
-<span class="sd">        htmlの保存先のパス</span>
-<span class="sd">    pkl: str or pathlib.Path</span>
-<span class="sd">        pickleの保存先のパス</span>
-<span class="sd">    indexes: list of int</span>
-<span class="sd">        グラフを作成する対象</span>
-<span class="sd">        </span>
-<span class="sd">    Return:</span>
-<span class="sd">        TSと考えられるindex番号を格納したリスト.TSがない場合,要素はNoneとなる</span>
+<span class="sd">    imagess: 2D list of Atoms</span>
+<span class="sd">        Atomsの2次元リスト.ListVibration.write_mode()で作成したtrajファイルから用意する.  </span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">indexes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">indexes</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">traj_list</span><span class="p">))]</span>
-        
-    <span class="n">energiess</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">vib_traj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">traj_list</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">vib_traj</span> <span class="ow">and</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">indexes</span><span class="p">:</span>
-            <span class="n">energies</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">vib_traj</span><span class="p">:</span>
-                <span class="n">i</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="n">calculator</span><span class="p">()</span>
-                <span class="n">energies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">())</span>
-            <span class="n">energiess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">energies</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">energiess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">energiess</span> <span class="o">=</span> <span class="p">[</span><span class="n">ma</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="k">if</span> <span class="n">images</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">images</span> <span class="ow">in</span> <span class="n">imagess</span><span class="p">]</span>
             
     <span class="n">sample_n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">energiess</span><span class="p">)</span>
     <span class="n">cols</span> <span class="o">=</span> <span class="mi">3</span> <span class="c1">#3列</span>
@@ -394,11 +389,23 @@
         <span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        
-    <span class="k">if</span> <span class="n">pkl</span><span class="p">:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pkl</span><span class="p">,</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="n">f</span><span class="p">)</span>
-            
+    
+    <span class="n">is_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ts_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fs_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">images</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="n">imagess</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">is_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">fs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">is_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Atoms</span><span class="p">())</span>
+            <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Atoms</span><span class="p">())</span>
+            <span class="n">fs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Atoms</span><span class="p">())</span>          
+    <span class="n">write</span><span class="p">(</span><span class="n">is_traj</span><span class="p">,</span><span class="n">is_list</span><span class="p">)</span>
+    <span class="n">write</span><span class="p">(</span><span class="n">ts_traj</span><span class="p">,</span><span class="n">ts_list</span><span class="p">)</span>
+    <span class="n">write</span><span class="p">(</span><span class="n">fs_traj</span><span class="p">,</span><span class="n">fs_list</span><span class="p">)</span>
+    
     <span class="k">return</span> <span class="n">idx</span></div>
 
             

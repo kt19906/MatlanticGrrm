@@ -47,7 +47,7 @@
 <li class="toctree-l2"><a class="reference internal" href="neb.html">NEB</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">振動解析</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#listvibrations">ListVibrations クラス</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#vib-graph">vib_graph()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#vib-graphs">vib_graphs()</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="atomslist.html">Atomsリストの操作</a></li>
@@ -120,86 +120,76 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="matlanticgrrm.vibrations.ListVibrations">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.vibrations.</span></span><span class="sig-name descname"><span class="pre">ListVibrations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorlog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indexes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vib'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/vibrations.html#ListVibrations"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.vibrations.ListVibrations" title="この定義へのパーマリンク"></a></dt>
-<dd><p>ase.vibrations.VibrationsをAtomsのリストでも使えるように拡張したクラス</p>
+<dd><p>ase.vibrations.VibrationsをAtomsのリストでも使えるようにしたもの</p>
 <p>Parameters:</p>
-<dl class="simple">
-<dt>atoms_list: list of ase.Atoms</dt><dd><p>Atomsのリスト</p>
-</dd>
-<dt>errorlog: str</dt><dd><p>logのファイルパス</p>
-</dd>
-<dt>indexex: list of int</dt><dd><p>計算対象をリストで指定</p>
-</dd>
-<dt>indices: list of int</dt><dd><p>動かす原子をリストで指定</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="matlanticgrrm.vibrations.ListVibrations.clean">
-<span class="sig-name descname"><span class="pre">clean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">empty_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combined</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/vibrations.html#ListVibrations.clean"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.vibrations.ListVibrations.clean" title="この定義へのパーマリンク"></a></dt>
-<dd><p>self.nameのフォルダ内の全てjsonファイルを削除する</p>
-</dd></dl>
-
+<p>atoms_list (list(Atoms)) : Atomsのリスト
+errorlog　(str) : logのファイルパス
+indexex (list) : 計算対象をリストで指定　&lt;--ここまでがListVibrations特有の引数
+indices (list) :　動かす原子をリストで指定 &lt;-- ここからがVibrationsの引数aseのDocumentを参照</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="matlanticgrrm.vibrations.ListVibrations.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/vibrations.html#ListVibrations.run"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.vibrations.ListVibrations.run" title="この定義へのパーマリンク"></a></dt>
-<dd><p>計算を実行する</p>
+<dd><div class="line-block">
+<div class="line">logの内容[logレベル]</div>
+<div class="line">{1} : index未指定 [INFO]</div>
+<div class="line">{2} : Atomsのオブジェクトが存在しない [INFO]</div>
+<div class="line">{5} : エラー [CRITICAL]</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>Imaginary_Frequency.htmlとImaginary_Freq_Idx.txtを出力する.
+実行中のnotebookと同じディレクトリにstop.logを作成すると計算を中断する.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="matlanticgrrm.vibrations.ListVibrations.summary">
-<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/vibrations.html#ListVibrations.summary"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.vibrations.ListVibrations.summary" title="この定義へのパーマリンク"></a></dt>
-<dd><p>振動数,振動モードの表をhtmlに保存する</p>
-<p>虚振動のindex番号をpickeファイルに保存することもできる.</p>
-<p>Parameters:</p>
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vib_table.html'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/vibrations.html#ListVibrations.summary"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.vibrations.ListVibrations.summary" title="この定義へのパーマリンク"></a></dt>
+<dd><p>Parameters:</p>
 <dl class="simple">
-<dt>html: str or pathlib.Path</dt><dd><p>htmlの保存先のパス</p>
+<dt>html: str or path object</dt><dd><p>htmlパス.htmlに表を保存する. Noneの場合は標準出力だが,数の多い場合は推奨しない</p>
 </dd>
-<dt>pkl: str or pathlib.Path</dt><dd><p>pickleの保存先のパス</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">戻り値</dt>
-<dd class="field-odd"><p>虚振動のindex番号を格納したリスト.虚振動がない場合,要素はNoneとなる</p>
+<dt>pkl:</dt><dd><p>pickleパス.指定した場合,各構造の虚数振動のモード番号をリストとしてpickleに保存する.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="matlanticgrrm.vibrations.ListVibrations.write_mode">
-<span class="sig-name descname"><span class="pre">write_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02585199101165164</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nimages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/vibrations.html#ListVibrations.write_mode"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.vibrations.ListVibrations.write_mode" title="この定義へのパーマリンク"></a></dt>
+<span class="sig-name descname"><span class="pre">write_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vib_all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02585199101165164</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nimages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/vibrations.html#ListVibrations.write_mode"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.vibrations.ListVibrations.write_mode" title="この定義へのパーマリンク"></a></dt>
 <dd><p>trajファイルを作成する</p>
 <p>Parameters:</p>
-<dl class="simple">
-<dt>n: list of int</dt><dd><p>振動モードのindex番号を格納したリスト</p>
+<dl>
+<dt>n_list: list of integer</dt><dd><div class="line-block">
+<div class="line">各構造のtrajとして書き出したい振動モードをリストで与える.</div>
+<div class="line">Noneの場合, 虚振動を自動判断する.</div>
+</div>
+</dd>
+<dt>savename: str</dt><dd><p>保存ファイル名（拡張子なし）</p>
 </dd>
 </dl>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>n_list=Noneを使う場合,事前にsummary()を実行しておく必要がある.</p>
+</div>
+<p>その他の引数はASEを参照</p>
 </dd></dl>
 
 </dd></dl>
 
 </section>
-<section id="vib-graph">
-<h2>vib_graph()<a class="headerlink" href="#vib-graph" title="この見出しへのパーマリンク"></a></h2>
+<section id="vib-graphs">
+<h2>vib_graphs()<a class="headerlink" href="#vib-graphs" title="この見出しへのパーマリンク"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="matlanticgrrm.vibrations.vib_graph">
-<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.vibrations.</span></span><span class="sig-name descname"><span class="pre">vib_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indexes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/vibrations.html#vib_graph"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.vibrations.vib_graph" title="この定義へのパーマリンク"></a></dt>
-<dd><p>振動のエネルギーダイアグラムを作成し,htmlに保存する.</p>
-<p>TSと考えられるindex番号をpickelファイルに保存することもできる.</p>
+<dt class="sig sig-object py" id="matlanticgrrm.vibrations.vib_graphs">
+<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.vibrations.</span></span><span class="sig-name descname"><span class="pre">vib_graphs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imagess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vib_graph.html'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_traj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Reverse.traj'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs_traj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Forward.traj'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_traj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'TS.traj'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/vibrations.html#vib_graphs"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.vibrations.vib_graphs" title="この定義へのパーマリンク"></a></dt>
+<dd><div class="line-block">
+<div class="line">Reverse.traj,Forward.traj,TS.trajが作成される.</div>
+<div class="line">Reverse.traj,Forward.trajは構造最適化(IRC)を行なうことで始構造, 終構造となる.</div>
+</div>
 <p>Parameters:</p>
 <dl class="simple">
-<dt>traj_list: list of Trajectory</dt><dd><p>ase.io.trajectory.Trajectoryオブジェクトのリスト</p>
-</dd>
-<dt>calculator: function object</dt><dd><p>aseのcalculatorを返す関数</p>
-</dd>
-<dt>html: str or pathlib.Path</dt><dd><p>htmlの保存先のパス</p>
-</dd>
-<dt>pkl: str or pathlib.Path</dt><dd><p>pickleの保存先のパス</p>
-</dd>
-<dt>indexes: list of int</dt><dd><p>グラフを作成する対象</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">戻り値</dt>
-<dd class="field-odd"><p>TSと考えられるindex番号を格納したリスト.TSがない場合,要素はNoneとなる</p>
+<dt>imagess: 2D list of Atoms</dt><dd><p>Atomsの2次元リスト.ListVibration.write_mode()で作成したtrajファイルから用意する.</p>
 </dd>
 </dl>
 </dd></dl>

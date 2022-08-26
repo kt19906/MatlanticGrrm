@@ -43,8 +43,8 @@ NEB
 .. code-block:: python
 
     from matlanticgrrm.atomslist import set_calculator, pfp_calculator
-    from matlanticgrrm.optimize import ListLFIRE
-    from matlanticgrrm.neb import ListLNEB
+    from matlanticgrrm.optimize import ListFIRE
+    from matlanticgrrm.neb import ListNEB
     from matlanticgrrm.grrmdata import get_connections
     from matlanticgrrm.io import lread
 
@@ -71,3 +71,30 @@ NEB
 
 | neb_graphsでエネルギーダイアグラム図はneb_graph.htmlに保存される.
 | 自動でTSの位置を取得しneb_ts.trajに保存される.
+
+VIB
+===============
+.. code-block:: python
+
+    from matlanticgrrm.visualize import view, view_images, view_with_index
+    from matlanticgrrm.atomslist import pfp_calculator,set_calculator
+    from matlanticgrrm.vibrations import ListVibrations, vib_graphs
+    from matlanticgrrm.io import lread, lwrite
+    from ase.io import read,iread,write
+
+    neb_ts = lread("*.traj") # TS構造をインポート
+
+    set_calculator(neb_ts,pfp_calculator)
+
+    view_with_index(neb_ts[0])
+    indices = [_, _, _, _] # Vibration計算で動かす原子のindex番号を控える
+
+    vib = ListVibrations(neb_ts,errorlog="VIB.log",indices=indices)
+
+    vib.run()
+
+    vib.summary(html="vib_table.html");
+    
+    # n_list=Noneの時は虚振動の trajファイルを作成する
+    # 特定のモードのtrajを作成したい場合index番号を入力
+    vib.write_mode(n_list=None)
