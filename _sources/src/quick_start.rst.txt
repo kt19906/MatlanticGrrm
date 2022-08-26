@@ -75,7 +75,7 @@ NEB
 VIB
 ===============
 
-:download:`コードのダウンロード <sample_code/VIB.txt>`
+:download:`コードのダウンロード <sample_code/VIB.txt>` (拡張子をipynbに変えて使用する)
 
 .. code-block:: python
 
