@@ -74,6 +74,9 @@ NEB
 
 VIB
 ===============
+
+:download:`コードのダウンロード <sample_code/VIB.txt>`
+
 .. code-block:: python
 
     from matlanticgrrm.visualize import view, view_images, view_with_index

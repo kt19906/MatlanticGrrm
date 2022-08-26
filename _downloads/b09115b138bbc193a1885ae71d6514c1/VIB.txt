@@ -1,0 +1,111 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2d0d7690-c44d-43ed-9dd2-54044ddfa12a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from matlanticgrrm.visualize import view, view_images, view_with_index\n",
+    "from matlanticgrrm.atomslist import pfp_calculator,set_calculator\n",
+    "from matlanticgrrm.vibrations import ListVibrations, vib_graphs\n",
+    "from matlanticgrrm.io import lread, lwrite\n",
+    "from ase.io import read,iread,write\n",
+    "from pathlib import Path"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "847e4e4d-47cf-42a5-b5e8-82f0428825df",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "neb_ts = lread(Path(\"*.traj\").expanduser()) # TS構造のインポート"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2e31d3a5-6d55-416b-a245-ed4520817c86",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "set_calculator(neb_ts,pfp_calculator)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6d9e20ce-5d3a-4742-8407-8028f19750e5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "view_with_index(neb_ts[0])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f7620590-6b08-45e6-811b-1a9789a065b7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "indices = [_, _, _,] # 動かす原子のindex番号を控える\n",
+    "vib = ListVibrations(neb_ts,errorlog=\"VIB.log\",indices=indices)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3afb41c2-e025-4d60-8816-dfb199098435",
+   "metadata": {},
+   "source": [
+    "ListVibrationについては[Document](https://kt19906.github.io/MatlanticGrrm/src/modules/vibrations.html#matlanticgrrm.vibrations.ListVibrations)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "047b7f99-4d03-49d3-8710-e02003fc8357",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "vib.summary(html=\"vib_table.html\");"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6a306250-695f-4ee1-a921-da0843350667",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "vib.write_mode()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3.7",
+   "language": "python",
+   "name": "python37"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
