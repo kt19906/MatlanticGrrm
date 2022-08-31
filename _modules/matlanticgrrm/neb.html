@@ -113,7 +113,7 @@
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">neb</span><span class="p">[</span><span class="n">item</span><span class="p">]</span></div>
 
-<span class="k">def</span> <span class="nf">calc_image_numbers</span><span class="p">(</span><span class="n">ini</span><span class="p">,</span> <span class="n">fin</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">divide_per</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">min_images</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span> 
+<div class="viewcode-block" id="calc_image_numbers"><a class="viewcode-back" href="../../src/modules/neb.html#matlanticgrrm.neb.calc_image_numbers">[ドキュメント]</a><span class="k">def</span> <span class="nf">calc_image_numbers</span><span class="p">(</span><span class="n">ini</span><span class="p">,</span> <span class="n">fin</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">divide_per</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">min_images</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span> 
     <span class="sd">&quot;&quot;&quot;始状態と終状態からNEB計算に最適なimageの数を算出する</span>
 <span class="sd">    </span>
 <span class="sd">    Paramaters:</span>
@@ -138,7 +138,7 @@
     <span class="k">if</span> <span class="n">inumber</span> <span class="o">&gt;</span> <span class="n">min_images</span><span class="p">:</span>
         <span class="n">number_of_images</span> <span class="o">=</span> <span class="n">inumber</span>
 
-    <span class="k">return</span> <span class="n">number_of_images</span>
+    <span class="k">return</span> <span class="n">number_of_images</span></div>
     
 
 <div class="viewcode-block" id="make_images"><a class="viewcode-back" href="../../src/modules/neb.html#matlanticgrrm.neb.make_images">[ドキュメント]</a><span class="k">def</span> <span class="nf">make_images</span><span class="p">(</span><span class="n">eq_list</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">n_images</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ReactionsSummary&quot;</span><span class="p">,</span>

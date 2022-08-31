@@ -11,19 +11,6 @@ Atomsリストの操作
 .. automodule:: matlanticgrrm.atomslist
    :members: copy, set_calculator, set_constraints, del_constraints,
     set_pbc, set_cell, translate, get_potential_energy, get_total_energy,
-    get_forces, get_positions, get_kinetic_energy,
+    get_forces, get_positions, get_kinetic_energy,pfp_calculator
 
 
-SMILESを利用した関数
-====================
-
-.. autofunction:: matlanticgrrm.atomslist.get_smiles
-.. autofunction:: matlanticgrrm.atomslist.grouping
-.. autofunction:: matlanticgrrm.atomslist.compare
-.. autofunction:: matlanticgrrm.atomslist.search_same_strucrtures
-
-その他
-====================
-
-.. autofunction:: matlanticgrrm.atomslist.pfp_calculator
-   

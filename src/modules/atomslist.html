@@ -46,13 +46,10 @@
 <li class="toctree-l2"><a class="reference internal" href="optimize.html">構造最適化</a></li>
 <li class="toctree-l2"><a class="reference internal" href="neb.html">NEB</a></li>
 <li class="toctree-l2"><a class="reference internal" href="vibrations.html">振動解析</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Atomsリストの操作</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#smiles">SMILESを利用した関数</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1">その他</a></li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Atomsリストの操作</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grrmdata.html">GRRMのデータのインポート</a></li>
 <li class="toctree-l2"><a class="reference internal" href="visualize.html">構造の可視化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geometries.html">ジオメトリ</a></li>
 <li class="toctree-l2"><a class="reference internal" href="formats.html">Atomsリストの保存・読み込み</a></li>
 <li class="toctree-l2"><a class="reference internal" href="log.html">Log</a></li>
 </ul>
@@ -238,119 +235,6 @@
 </div>
 </dd></dl>
 
-<section id="smiles">
-<h2>SMILESを利用した関数<a class="headerlink" href="#smiles" title="この見出しへのパーマリンク"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="matlanticgrrm.atomslist.get_smiles">
-<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">get_smiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#get_smiles"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.get_smiles" title="この定義へのパーマリンク"></a></dt>
-<dd><p>カノニカルSMILESを出力する.</p>
-<p>Parameters:</p>
-<dl class="simple">
-<dt>atoms_list: ase.Atoms or list of ase.Atoms</dt><dd><p>ase.Atomsまたは,そのリスト</p>
-</dd>
-<dt>target0: list of int</dt><dd><p>target0, target1, target2に指定した原子同士の結合を見る,デフォルトでは全ての原子</p>
-</dd>
-<dt>target1: list of int</dt><dd><p>target0に指定した原子との結合を見る</p>
-</dd>
-<dt>target2: list of int</dt><dd><p>target0, target2に指定した原子同士の結合を見る</p>
-</dd>
-<dt>mult: float</dt><dd><p>カットオフの係数(数字が大きいと離れていても結合しているとみなされる)</p>
-</dd>
-<dt>kwargs:</dt><dd><p>元素の共有結合半径を上書きする(例: Al=1.1)</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">戻り値</dt>
-<dd class="field-odd"><p>カノニカルSMILESのリスト</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matlanticgrrm.atomslist.grouping">
-<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">grouping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#grouping"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.grouping" title="この定義へのパーマリンク"></a></dt>
-<dd><p>atoms_listの内,同じ構造をグループする.</p>
-<p>Parameters:</p>
-<dl class="simple">
-<dt>atoms_list: list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.</p>
-</dd>
-<dt>target0: list of int</dt><dd><p>target0, target1, target2に指定した原子同士の結合を見る</p>
-</dd>
-<dt>target1: list of int</dt><dd><p>target0に指定した原子との結合を見る</p>
-</dd>
-<dt>target2: list of int</dt><dd><p>target0, target2に指定した原子同士の結合を見る</p>
-</dd>
-<dt>output_type: 1 or 2</dt><dd><p>戻り値の形式</p>
-</dd>
-<dt>mult: float</dt><dd><p>カットオフの係数</p>
-</dd>
-<dt>kwargs:</dt><dd><p>元素の名前と共有結合半径を指定(例:Al=1.2), カットオフ値が上書きされる.</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">注釈</p>
-<p>output_type=1の場合,atoms_listと同じ要素数の1Dリストを返す.要素には数値が入っており,同じ構造は同じ数値が入る.
-つまり,数値=グループ名.
-output_type=2の場合,2Dリストを返す.各要素(リスト)には同じ構造と判断されたatoms_listのindex番号が入っている.
-つまり,数値=atoms_listのindex番号であり,要素数=グループの数である.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">注釈</p>
-<p>RDkitを用いて,カノニカルSMILESを比較することで同じ構造かどうかを判定している.
-結合しているかどうかの判断はASEを用いている.
-カノニカルsmileで比較しているので,1-シクロヘキサンと2-シクロヘキサンは同一であると判断される．
-稀に異なる構造でも同じSMILESを返すことがあるので注意</p>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matlanticgrrm.atomslist.compare">
-<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms_list2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#compare"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.compare" title="この定義へのパーマリンク"></a></dt>
-<dd><p>2つのatoms_listが同じ構造か調べる</p>
-<p>atoms_list1とatoms_list2の1番目の要素同士,2番目の要素同士...で比較する</p>
-<p>Parameters:</p>
-<dl class="simple">
-<dt>atoms_list1: ase.Atoms or list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.またはase.Atoms</p>
-</dd>
-<dt>atoms_list2: ase.Atoms or list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.またはase.Atoms</p>
-</dd>
-<dt>Return: bool or list of bool:</dt><dd><p>構造の同じものはTrueを返す
-atoms_listをリストで与えた場合，boolとNoneを格納したリストを返す
-atoms_list1,atoms_list2のどちらか一方の要素がNoneの場合はNoneの要素が格納される.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="matlanticgrrm.atomslist.search_same_strucrtures">
-<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">search_same_strucrtures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#search_same_strucrtures"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.search_same_strucrtures" title="この定義へのパーマリンク"></a></dt>
-<dd><p>atoms_listの内,同じ構造を探す．</p>
-<p>Parameters:</p>
-<dl class="simple">
-<dt>target_atoms: ase.Atoms or list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.またはase.Atoms, 検索対象</p>
-</dd>
-<dt>range_atoms: ase.Atoms or list of ase.Atoms</dt><dd><p>ase.Atomsを要素とするリスト.またはase.Atoms, 検索範囲</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">戻り値</dt>
-<dd class="field-odd"><p>target_atomsと同じ構造と判断された構造をatoms_listのindex番号で返す.
-target_atomsをリストで与えた場合は2次元リストを返す</p>
-</dd>
-</dl>
-</dd></dl>
-
-</section>
-<section id="id1">
-<h2>その他<a class="headerlink" href="#id1" title="この見出しへのパーマリンク"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="matlanticgrrm.atomslist.pfp_calculator">
-<span class="sig-prename descclassname"><span class="pre">matlanticgrrm.atomslist.</span></span><span class="sig-name descname"><span class="pre">pfp_calculator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/atomslist.html#pfp_calculator"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.atomslist.pfp_calculator" title="この定義へのパーマリンク"></a></dt>
-<dd><p>PFPのcalculatorを返す</p>
-<p>ソースコードを確認</p>
-</dd></dl>
-
-</section>
 </section>
 
 
