@@ -19,12 +19,10 @@ make_images()
 
     ListNEBまで作成するには :func:`nebmake` を使用する 
 
-nebmake()
-==============
-.. autoclass:: matlanticgrrm.neb.nebmake
-
-    内部的には :func:`nebmake` と :class:`ListNEB` のインスタンス化を行なっている
-
 neb_graphs()
 ===============
 .. autoclass:: matlanticgrrm.neb.neb_graphs
+
+calc_image_numbers()
+===============
+.. autoclass:: matlanticgrrm.neb.calc_image_numbers

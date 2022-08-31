@@ -47,8 +47,8 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">NEB</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#listneb">ListNEB クラス</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#make-images">make_images()</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#nebmake">nebmake()</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#neb-graphs">neb_graphs()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#calc-image-numbers">calc_image_numbers()</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="vibrations.html">振動解析</a></li>
@@ -123,13 +123,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="matlanticgrrm.neb.ListNEB">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.neb.</span></span><span class="sig-name descname"><span class="pre">ListNEB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imagess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">climb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_rotation_and_translation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">world</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'aseneb'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_shared_calculator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/neb.html#ListNEB"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.neb.ListNEB" title="この定義へのパーマリンク"></a></dt>
-<dd><p>Parameters:</p>
-<dl class="simple">
-<dt>imagess: list of images (2D list of Atoms)</dt><dd><p>imagesのリスト(Atomsの2次元リスト)</p>
-</dd>
-</dl>
-<p>その他の引数は <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/ase/neb.html#ase.neb.NEB">NEB</a> を参照</p>
-<p>その他の引数は <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/ase/neb.html#ase.neb.NEB">ase.neb.NEB</a> を参照</p>
+<dd><p>その他の引数は <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/ase/neb.html#ase.neb.NEB">ase.neb.NEB</a> を参照</p>
 </dd></dl>
 
 </section>
@@ -137,73 +131,44 @@
 <h2>make_images()<a class="headerlink" href="#make-images" title="この見出しへのパーマリンク"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="matlanticgrrm.neb.make_images">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.neb.</span></span><span class="sig-name descname"><span class="pre">make_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connections</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nimages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">same_react</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">same_connect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nebmake.log'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/neb.html#make_images"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.neb.make_images" title="この定義へのパーマリンク"></a></dt>
-<dd><p>NEBのイメージを作成する.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.neb.</span></span><span class="sig-name descname"><span class="pre">make_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eq_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connections</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ReactionsSummary'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">divide_per</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/neb.html#make_images"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.neb.make_images" title="この定義へのパーマリンク"></a></dt>
+<dd><p>NEB計算のImagesを作成する.</p>
+<div class="line-block">
+<div class="line">不要な反応のImageは作成しない. 例えば,同じini,finの組み合わせを持つ反応は1つしかImagesを作らない.</div>
+<div class="line">作成されなかったImageの理由をHTMLファイル,またはlogファイルに出力する.</div>
+<div class="line">eq_listをGeometryで与えた場合HTMLファイル,Atomsリストで与えた場合logファイルが作成される.</div>
+</div>
 <p>Parameters:</p>
 <dl>
-<dt>eq: list of Atoms</dt><dd><p>EQのAtomsリスト,計算したくないものは要素にNoneを設定しておく.</p>
-</dd>
-<dt>connections: list of tuple of int</dt><dd><p>CONNECTION情報.??やDCが含まれていてもOK.</p>
-</dd>
-<dt>nimages: integer</dt><dd><p>作成するimageの数</p>
-</dd>
-<dt>ts: list of Atoms</dt><dd><div class="line-block">
-<div class="line">TS構造のAtomsリスト, imagesの中間に挿入する</div>
-<div class="line">現在作成中で使用不可</div>
+<dt>eq_list: list of Atoms or matlanticgrrm.geometry.Geometry</dt><dd><div class="line-block">
+<div class="line">EQ構造</div>
+<div class="line">Atomsのリストの場合: 同じCONNECTIONの反応のimagesは作らない.</div>
+<div class="line">matlanticgrrm.geometry.Geometryの場合: 同じ構造と判断された反応のimagesは作らない(構造のグループ化)</div>
 </div>
 </dd>
-<dt>same_react: bool</dt><dd><p>Trueにした場合,同じ反応のNEBimageも作成.</p>
+<dt>connections: list of tuple of interger</dt><dd><div class="line-block">
+<div class="line">CONNECTIONのリスト</div>
+<div class="line">ex) [(0,1),(2,4),(3,5)]</div>
+</div>
 </dd>
-<dt>same_connect: bool</dt><dd><p>Trueにした場合,同じeqを繋ぐNEBimageも作成.</p>
+<dt>n_images: interger or list or None</dt><dd><div class="line-block">
+<div class="line">Imageの数.</div>
+<div class="line">intの場合: 全てintで指定したImage数で作成</div>
+<div class="line">listの場合:</div>
+<div class="line">Noneの場合: iniとfinの構造の差から最適なImage数を算出し作成.</div>
+</div>
 </dd>
-<dt>log: str or None</dt><dd><p>logのファイル名. Noneの場合ファイルを出力しない</p>
+<dt>indices:</dt><dd><div class="line-block">
+<div class="line">indicesに指定した原子の移動距離から適切なimages数を決定する.</div>
+<div class="line">Noneの場合，全ての原子の移動距離を見る</div>
+</div>
+</dd>
+<dt>divide_per: float</dt><dd><p>最も大きく動いた原子の移動距離をこの距離で割ってイメージ数を定める（Å）</p>
+</dd>
+<dt>min_images: int</dt><dd><p>最小のイメージ数を定める</p>
 </dd>
 </dl>
-<dl class="field-list simple">
-<dt class="field-odd">戻り値</dt>
-<dd class="field-odd"><p>ase.neb.NEB.imagesを要素とするリスト,作成しなかったimageはNone.&quot;-&quot;で標準出力</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">注釈</p>
-<p>logファイルを出力する.</p>
-</div>
-<p>ListNEBまで作成するには <a class="reference internal" href="#matlanticgrrm.neb.nebmake" title="matlanticgrrm.neb.nebmake"><code class="xref py py-func docutils literal notranslate"><span class="pre">nebmake()</span></code></a> を使用する</p>
-</dd></dl>
-
-</section>
-<section id="nebmake">
-<h2>nebmake()<a class="headerlink" href="#nebmake" title="この見出しへのパーマリンク"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="matlanticgrrm.neb.nebmake">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.neb.</span></span><span class="sig-name descname"><span class="pre">nebmake</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connections</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nimages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_func=&lt;function</span> <span class="pre">pfp_calculator&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">same_react=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">same_connect=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log='nebmake.log'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k=0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">climb=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_rotation_and_translation=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">world=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method='aseneb'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_shared_calculator=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precon=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/neb.html#nebmake"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.neb.nebmake" title="この定義へのパーマリンク"></a></dt>
-<dd><p>imagessを作成し,NEBListをオブジェクトを作成する</p>
-<p>Parameters:</p>
-<dl>
-<dt>eq: list of Atoms</dt><dd><p>EQ構造のAtomsリスト</p>
-</dd>
-<dt>connections: list of tuples of integers</dt><dd><p>CONNECTIONSの情報のリスト,  または <code class="xref py py-class docutils literal notranslate"><span class="pre">GrrmData</span></code> で取得できる</p>
-</dd>
-<dt>nimages: integer</dt><dd><p>imageの数</p>
-</dd>
-<dt>calc_func: function</dt><dd><div class="line-block">
-<div class="line">calculatorを返す関数</div>
-<div class="line">imagesにcalculatorを設定ため</div>
-</div>
-</dd>
-<dt>ts: list of Atoms</dt><dd><div class="line-block">
-<div class="line">TS構造のAtomsリスト, imagesの中間に挿入する</div>
-<div class="line">現在作成中で使用不可</div>
-</div>
-</dd>
-<dt>same_react: bool</dt><dd><p>Trueにした場合,同じ反応のNEBimageも作成.</p>
-</dd>
-<dt>same_connect: bool</dt><dd><p>Trueにした場合,同じeqを繋ぐNEBimageも作成.</p>
-</dd>
-<dt>log: str or None</dt><dd><p>logのファイル名. Noneの場合ファイルを出力しない</p>
-</dd>
-</dl>
-<p>内部的には <a class="reference internal" href="#matlanticgrrm.neb.nebmake" title="matlanticgrrm.neb.nebmake"><code class="xref py py-func docutils literal notranslate"><span class="pre">nebmake()</span></code></a> と <a class="reference internal" href="#matlanticgrrm.neb.ListNEB" title="matlanticgrrm.neb.ListNEB"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListNEB</span></code></a> のインスタンス化を行なっている</p>
+<p>ListNEBまで作成するには <code class="xref py py-func docutils literal notranslate"><span class="pre">nebmake()</span></code> を使用する</p>
 </dd></dl>
 
 </section>
@@ -228,6 +193,28 @@
 </div>
 </dd>
 <dt>pkl: str or path object</dt><dd><p>TS構造のindex番号, TS構造が存在しない要素はNone</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="calc-image-numbers">
+<h2>calc_image_numbers()<a class="headerlink" href="#calc-image-numbers" title="この見出しへのパーマリンク"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="matlanticgrrm.neb.calc_image_numbers">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">matlanticgrrm.neb.</span></span><span class="sig-name descname"><span class="pre">calc_image_numbers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ini</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">divide_per</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/matlanticgrrm/neb.html#calc_image_numbers"><span class="viewcode-link"><span class="pre">[ソース]</span></span></a><a class="headerlink" href="#matlanticgrrm.neb.calc_image_numbers" title="この定義へのパーマリンク"></a></dt>
+<dd><p>始状態と終状態からNEB計算に最適なimageの数を算出する</p>
+<p>Paramaters:</p>
+<dl class="simple">
+<dt>ini: Atoms</dt><dd><p>始状態のAtomsオブジェクト</p>
+</dd>
+<dt>fin: Atoms</dt><dd><p>終状態のAtomsオブジェクト</p>
+</dd>
+<dt>indices: List of integer</dt><dd><p>着目する原子のインデックス番号</p>
+</dd>
+<dt>divide_per: float</dt><dd><p>最も大きく動いた原子の移動距離をこの距離で割ってイメージ数を定める（Å）</p>
+</dd>
+<dt>min_images: int</dt><dd><p>最小のイメージ数を定める</p>
 </dd>
 </dl>
 </dd></dl>

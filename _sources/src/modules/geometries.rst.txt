@@ -1,0 +1,12 @@
+###########################
+ジオメトリ
+###########################
+
+.. module:: matlanticgrrm.geometry.geometries
+
+Geometries クラス
+===============
+.. autoclass:: matlanticgrrm.geometry.geometries.Geometries
+    :members: same, similar
+
+

@@ -75,28 +75,20 @@
 <span></span><span class="kn">import</span> <span class="nn">ase</span>
 <span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atoms</span>
 <span class="kn">from</span> <span class="nn">ase.io</span> <span class="kn">import</span> <span class="n">write</span>
-<span class="kn">from</span> <span class="nn">ase.neb</span> <span class="kn">import</span> <span class="n">NEB</span>
+<span class="kn">from</span> <span class="nn">ase.neb</span> <span class="kn">import</span> <span class="n">NEB</span><span class="p">,</span><span class="n">interpolate</span>
 <span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Bohr</span><span class="p">,</span><span class="n">Rydberg</span><span class="p">,</span><span class="n">kJ</span><span class="p">,</span><span class="n">kB</span><span class="p">,</span><span class="n">fs</span><span class="p">,</span><span class="n">Hartree</span><span class="p">,</span><span class="n">mol</span><span class="p">,</span><span class="n">kcal</span>
+<span class="kn">from</span> <span class="nn">ase.geometry.analysis</span> <span class="kn">import</span> <span class="n">Analysis</span>
 <span class="kn">from</span> <span class="nn">plotly.subplots</span> <span class="kn">import</span> <span class="n">make_subplots</span>
 <span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
 <span class="kn">import</span> <span class="nn">math</span><span class="o">,</span><span class="nn">pickle</span>
 <span class="kn">import</span> <span class="nn">matlanticgrrm.atomslist</span> <span class="k">as</span> <span class="nn">ma</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">find_peaks</span>
-
-<span class="kn">from</span> <span class="nn">.atomslist</span> <span class="kn">import</span> <span class="n">pfp_calculator</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">.geometry</span> <span class="kn">import</span> <span class="n">_calc_max_distance</span><span class="p">,</span> <span class="n">Geometries</span>
 
 <div class="viewcode-block" id="ListNEB"><a class="viewcode-back" href="../../src/modules/neb.html#matlanticgrrm.neb.ListNEB">[ドキュメント]</a><span class="k">class</span> <span class="nc">ListNEB</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    </span>
-<span class="sd">    Parameters:</span>
-<span class="sd">    </span>
-<span class="sd">    imagess: list of images (2D list of Atoms)</span>
-<span class="sd">        imagesのリスト(Atomsの2次元リスト)</span>
-<span class="sd">        </span>
-<span class="sd">    その他の引数は :ase:`NEB &lt;neb.html#ase.neb.NEB&gt;` を参照</span>
-<span class="sd">    </span>
-<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">imagess</span><span class="p">,</span><span class="n">k</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">climb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">remove_rotation_and_translation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">world</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;aseneb&#39;</span><span class="p">,</span><span class="n">allow_shared_calculator</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">precon</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">imagess</span> <span class="o">=</span> <span class="n">imagess</span>
@@ -119,94 +111,113 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">imagess</span><span class="p">)</span>
     
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">neb</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>  </div>
-        
-<div class="viewcode-block" id="nebmake"><a class="viewcode-back" href="../../src/modules/neb.html#matlanticgrrm.neb.nebmake">[ドキュメント]</a><span class="k">def</span> <span class="nf">nebmake</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">nimages</span><span class="p">,</span><span class="n">calc_func</span><span class="o">=</span><span class="n">pfp_calculator</span><span class="p">,</span><span class="n">ts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">same_react</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">same_connect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="s2">&quot;nebmake.log&quot;</span><span class="p">,</span>
-            <span class="n">k</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">climb</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">remove_rotation_and_translation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">world</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;aseneb&#39;</span><span class="p">,</span><span class="n">allow_shared_calculator</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">precon</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;imagessを作成し,NEBListをオブジェクトを作成する</span>
-<span class="sd">    </span>
-<span class="sd">    Parameters:</span>
-<span class="sd">    </span>
-<span class="sd">    eq: list of Atoms</span>
-<span class="sd">        EQ構造のAtomsリスト</span>
-<span class="sd">    connections: list of tuples of integers</span>
-<span class="sd">        CONNECTIONSの情報のリスト,  または :class:`GrrmData` で取得できる</span>
-<span class="sd">    nimages: integer</span>
-<span class="sd">        imageの数</span>
-<span class="sd">    calc_func: function</span>
-<span class="sd">        | calculatorを返す関数</span>
-<span class="sd">        | imagesにcalculatorを設定ため</span>
-<span class="sd">    ts: list of Atoms</span>
-<span class="sd">        | TS構造のAtomsリスト, imagesの中間に挿入する</span>
-<span class="sd">        | 現在作成中で使用不可</span>
-<span class="sd">    same_react: bool</span>
-<span class="sd">        Trueにした場合,同じ反応のNEBimageも作成.</span>
-<span class="sd">    same_connect: bool</span>
-<span class="sd">        Trueにした場合,同じeqを繋ぐNEBimageも作成.</span>
-<span class="sd">    log: str or None</span>
-<span class="sd">        logのファイル名. Noneの場合ファイルを出力しない</span>
-<span class="sd">        </span>
-<span class="sd">    </span>
-<span class="sd">    </span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">imagess</span> <span class="o">=</span> <span class="n">make_images</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">nimages</span><span class="p">,</span><span class="n">ts</span><span class="o">=</span><span class="n">ts</span><span class="p">,</span>
-                          <span class="n">same_react</span><span class="o">=</span><span class="n">same_react</span><span class="p">,</span><span class="n">same_connect</span><span class="o">=</span><span class="n">same_connect</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">images</span> <span class="ow">in</span> <span class="n">imagess</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">images</span><span class="p">:</span>
-            <span class="n">ma</span><span class="o">.</span><span class="n">set_calculator</span><span class="p">(</span><span class="n">images</span><span class="p">,</span><span class="n">calc_func</span><span class="p">)</span>
-            
-    <span class="n">neb</span> <span class="o">=</span> <span class="n">ListNEB</span><span class="p">(</span><span class="n">imagess</span><span class="p">,</span><span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span><span class="n">climb</span><span class="o">=</span><span class="n">climb</span><span class="p">,</span><span class="n">parallel</span><span class="o">=</span><span class="n">parallel</span><span class="p">,</span>
-                  <span class="n">remove_rotation_and_translation</span><span class="o">=</span><span class="n">remove_rotation_and_translation</span><span class="p">,</span><span class="n">world</span><span class="o">=</span><span class="n">world</span><span class="p">,</span>
-                  <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span><span class="n">allow_shared_calculator</span><span class="o">=</span><span class="n">allow_shared_calculator</span><span class="p">,</span><span class="n">precon</span><span class="o">=</span><span class="n">precon</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">neb</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">neb</span><span class="p">[</span><span class="n">item</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="make_images"><a class="viewcode-back" href="../../src/modules/neb.html#matlanticgrrm.neb.make_images">[ドキュメント]</a><span class="k">def</span> <span class="nf">make_images</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">nimages</span><span class="p">,</span><span class="n">ts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">same_react</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">same_connect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="s2">&quot;nebmake.log&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;NEBのイメージを作成する.</span>
+<span class="k">def</span> <span class="nf">calc_image_numbers</span><span class="p">(</span><span class="n">ini</span><span class="p">,</span> <span class="n">fin</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">divide_per</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">min_images</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span> 
+    <span class="sd">&quot;&quot;&quot;始状態と終状態からNEB計算に最適なimageの数を算出する</span>
+<span class="sd">    </span>
+<span class="sd">    Paramaters:</span>
+<span class="sd">    </span>
+<span class="sd">    ini: Atoms</span>
+<span class="sd">        始状態のAtomsオブジェクト</span>
+<span class="sd">    fin: Atoms</span>
+<span class="sd">        終状態のAtomsオブジェクト</span>
+<span class="sd">    indices: List of integer</span>
+<span class="sd">        着目する原子のインデックス番号</span>
+<span class="sd">    divide_per: float</span>
+<span class="sd">        最も大きく動いた原子の移動距離をこの距離で割ってイメージ数を定める（Å）</span>
+<span class="sd">    min_images: int</span>
+<span class="sd">        最小のイメージ数を定める</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">number_of_images</span> <span class="o">=</span> <span class="n">min_images</span>
+    <span class="n">maxd</span> <span class="o">=</span> <span class="n">_calc_max_distance</span><span class="p">(</span><span class="n">ini</span><span class="p">,</span> <span class="n">fin</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+
+    <span class="n">inumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">maxd</span> <span class="o">/</span> <span class="n">divide_per</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="c1"># 奇数，偶数の場合がある</span>
+    <span class="n">inumber</span> <span class="o">=</span> <span class="n">inumber</span> <span class="k">if</span> <span class="n">inumber</span><span class="o">%</span><span class="mi">2</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="n">inumber</span><span class="o">+</span><span class="mi">1</span> <span class="c1"># 奇数の場合は1を足して偶数にする</span>
+
+    <span class="k">if</span> <span class="n">inumber</span> <span class="o">&gt;</span> <span class="n">min_images</span><span class="p">:</span>
+        <span class="n">number_of_images</span> <span class="o">=</span> <span class="n">inumber</span>
+
+    <span class="k">return</span> <span class="n">number_of_images</span>
+    
+
+<div class="viewcode-block" id="make_images"><a class="viewcode-back" href="../../src/modules/neb.html#matlanticgrrm.neb.make_images">[ドキュメント]</a><span class="k">def</span> <span class="nf">make_images</span><span class="p">(</span><span class="n">eq_list</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">n_images</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ReactionsSummary&quot;</span><span class="p">,</span>
+                 <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">divide_per</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">min_images</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span><span class="n">mic</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;NEB計算のImagesを作成する. </span>
+<span class="sd">    </span>
+<span class="sd">    | 不要な反応のImageは作成しない. 例えば,同じini,finの組み合わせを持つ反応は1つしかImagesを作らない.</span>
+<span class="sd">    | 作成されなかったImageの理由をHTMLファイル,またはlogファイルに出力する.</span>
+<span class="sd">    | eq_listをGeometryで与えた場合HTMLファイル,Atomsリストで与えた場合logファイルが作成される.</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
 <span class="sd">    </span>
-<span class="sd">    eq: list of Atoms</span>
-<span class="sd">        EQのAtomsリスト,計算したくないものは要素にNoneを設定しておく.</span>
-<span class="sd">    connections: list of tuple of int</span>
-<span class="sd">        CONNECTION情報.??やDCが含まれていてもOK.</span>
-<span class="sd">    nimages: integer</span>
-<span class="sd">        作成するimageの数</span>
-<span class="sd">    ts: list of Atoms</span>
-<span class="sd">        | TS構造のAtomsリスト, imagesの中間に挿入する</span>
-<span class="sd">        | 現在作成中で使用不可</span>
-<span class="sd">    same_react: bool</span>
-<span class="sd">        Trueにした場合,同じ反応のNEBimageも作成.</span>
-<span class="sd">    same_connect: bool</span>
-<span class="sd">        Trueにした場合,同じeqを繋ぐNEBimageも作成.</span>
-<span class="sd">    log: str or None</span>
-<span class="sd">        logのファイル名. Noneの場合ファイルを出力しない</span>
-<span class="sd">        </span>
-<span class="sd">    Return:</span>
-<span class="sd">        ase.neb.NEB.imagesを要素とするリスト,作成しなかったimageはNone.&quot;-&quot;で標準出力</span>
-<span class="sd">        </span>
-<span class="sd">    Note:</span>
-<span class="sd">        logファイルを出力する.</span>
+<span class="sd">    eq_list: list of Atoms or matlanticgrrm.geometry.Geometry</span>
+<span class="sd">        | EQ構造</span>
+<span class="sd">        | Atomsのリストの場合: 同じCONNECTIONの反応のimagesは作らない.</span>
+<span class="sd">        | matlanticgrrm.geometry.Geometryの場合: 同じ構造と判断された反応のimagesは作らない(構造のグループ化)</span>
+<span class="sd">    connections: list of tuple of interger</span>
+<span class="sd">        | CONNECTIONのリスト</span>
+<span class="sd">        | ex) [(0,1),(2,4),(3,5)] </span>
+<span class="sd">    n_images: interger or list or None</span>
+<span class="sd">        | Imageの数.</span>
+<span class="sd">        | intの場合: 全てintで指定したImage数で作成</span>
+<span class="sd">        | listの場合: </span>
+<span class="sd">        | Noneの場合: iniとfinの構造の差から最適なImage数を算出し作成.</span>
+<span class="sd">    indices:</span>
+<span class="sd">        | indicesに指定した原子の移動距離から適切なimages数を決定する.</span>
+<span class="sd">        | Noneの場合，全ての原子の移動距離を見る</span>
+<span class="sd">    divide_per: float</span>
+<span class="sd">        最も大きく動いた原子の移動距離をこの距離で割ってイメージ数を定める（Å）</span>
+<span class="sd">    min_images: int</span>
+<span class="sd">        最小のイメージ数を定める</span>
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">imagess</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">indexes</span> <span class="o">=</span> <span class="n">make_nebmakelog</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">ts</span><span class="p">,</span><span class="n">same_react</span><span class="p">,</span><span class="n">same_connect</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ts</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;TSを中間に挿入しimagesを作成&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,(</span><span class="n">ini</span><span class="p">,</span><span class="n">fin</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">connections</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indexes</span><span class="p">:</span>
-                <span class="k">pass</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">imagess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">eq_list</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="c1">#計算するTS番号と移動距離の取得&amp;Log出力</span>
+        <span class="n">indexes</span> <span class="o">=</span> <span class="n">make_nebmakelog</span><span class="p">(</span><span class="n">eq_list</span><span class="p">,</span><span class="n">connections</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">n_images</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="n">n_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">n_images</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indexes</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">eq_list</span><span class="p">))]</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">n_images</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="k">pass</span> <span class="c1"># なにもしない(n_images=n_images)</span>
+        <span class="k">elif</span> <span class="n">n_images</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">calc_image_numbers</span><span class="p">(</span><span class="n">eq_list</span><span class="p">[</span><span class="n">ini</span><span class="p">],</span><span class="n">eq_list</span><span class="p">[</span><span class="n">fin</span><span class="p">],</span><span class="n">indices</span><span class="p">,</span><span class="n">divide_per</span><span class="p">,</span><span class="n">min_images</span><span class="p">)</span> 
+                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">ini</span><span class="p">)</span><span class="o">!=</span><span class="nb">str</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">fin</span><span class="p">)</span><span class="o">!=</span><span class="nb">str</span> <span class="k">else</span> <span class="kc">None</span> 
+                        <span class="k">for</span> <span class="n">ini</span><span class="p">,</span><span class="n">fin</span> <span class="ow">in</span> <span class="n">connections</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;n_imagesはint,list,Noneのいずれか&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">eq_list</span><span class="p">)</span> <span class="o">==</span> <span class="n">Geometries</span><span class="p">:</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="n">eq_list</span>
+        <span class="n">eq_list</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">atoms_list</span>
+        <span class="c1">#計算するTS番号と移動距離の取得&amp;HTML出力</span>
+        <span class="n">indexes_and_distance</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">get_valid_reaction_and_summary</span><span class="p">(</span><span class="n">connections</span><span class="p">,</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;.html&quot;</span><span class="p">)</span>
+        <span class="n">indexes</span> <span class="o">=</span> <span class="n">indexes_and_distance</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">indexes_and_distance</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">n_images</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="n">n_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">n_images</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indexes</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">geometry</span><span class="p">))]</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">n_images</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="k">pass</span> <span class="c1"># なにもしない(n_images=n_images)</span>
+        <span class="k">elif</span> <span class="n">n_images</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">target0</span><span class="o">+</span><span class="n">geometry</span><span class="o">.</span><span class="n">target1</span>
+            <span class="n">n_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">calc_image_numbers</span><span class="p">(</span><span class="n">eq_list</span><span class="p">[</span><span class="n">ini</span><span class="p">],</span><span class="n">eq_list</span><span class="p">[</span><span class="n">fin</span><span class="p">],</span><span class="n">indices</span><span class="p">,</span><span class="n">divide_per</span><span class="p">,</span><span class="n">min_images</span><span class="p">)</span> 
+                        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">ini</span><span class="p">)</span><span class="o">!=</span><span class="nb">str</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">fin</span><span class="p">)</span><span class="o">!=</span><span class="nb">str</span> <span class="k">else</span> <span class="kc">None</span> 
+                        <span class="k">for</span> <span class="n">ini</span><span class="p">,</span><span class="n">fin</span> <span class="ow">in</span> <span class="n">connections</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;n_imagesはint,list,Noneのいずれか&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;TSを中間に挿入することなくimagesを作成&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,(</span><span class="n">ini</span><span class="p">,</span><span class="n">fin</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">connections</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indexes</span><span class="p">:</span>
-                <span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="n">eq</span><span class="p">[</span><span class="n">ini</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nimages</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span><span class="o">+</span><span class="p">[</span><span class="n">eq</span><span class="p">[</span><span class="n">fin</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()]</span>
-                <span class="n">ase</span><span class="o">.</span><span class="n">neb</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">mic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="n">imagess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">imagess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">imagess</span></div>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;eq_listはAtomsのリスト,matlanticgrrm.geometry.Geometryのいずれか&quot;</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">_make_images</span><span class="p">(</span><span class="n">eq_list</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">indexes</span><span class="p">,</span><span class="n">n_images</span><span class="p">,</span><span class="n">mic</span><span class="p">)</span></div>
+        
+<span class="k">def</span> <span class="nf">_make_images</span><span class="p">(</span><span class="n">eq_list</span><span class="p">:</span><span class="nb">list</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">indexes</span><span class="p">,</span><span class="n">n_images</span><span class="p">:</span><span class="nb">list</span><span class="p">,</span><span class="n">mic</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">imagess</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,((</span><span class="n">ini_idx</span><span class="p">,</span><span class="n">fin_idx</span><span class="p">),</span><span class="n">n_image</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">connections</span><span class="p">,</span><span class="n">n_images</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indexes</span><span class="p">:</span>
+            <span class="n">images</span><span class="o">=</span><span class="p">[</span><span class="n">eq_list</span><span class="p">[</span><span class="n">ini_idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()]</span><span class="o">+</span><span class="p">[</span><span class="n">eq_list</span><span class="p">[</span><span class="n">ini_idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_image</span><span class="p">)]</span><span class="o">+</span><span class="p">[</span><span class="n">eq_list</span><span class="p">[</span><span class="n">fin_idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()]</span>
+            <span class="n">interpolate</span><span class="p">(</span><span class="n">images</span><span class="p">,</span><span class="n">mic</span><span class="o">=</span><span class="n">mic</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">images</span><span class="o">=</span><span class="kc">None</span>
+        <span class="n">imagess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">imagess</span>
     
 <span class="k">def</span> <span class="nf">make_nebmakelog</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span><span class="n">connections</span><span class="p">,</span><span class="n">ts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">same_react</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">same_connect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="s2">&quot;nebmake.log&quot;</span><span class="p">):</span>
     <span class="n">connect_copy</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1">#重複したini,finの組み合わせがないか探すため</span>
@@ -331,10 +342,74 @@
         
     <span class="k">return</span> <span class="n">idx</span></div>
 
-<span class="k">def</span> <span class="nf">neb_graph</span><span class="p">(</span><span class="n">image</span><span class="p">,</span><span class="n">calculator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">calculator</span><span class="p">:</span>
-        <span class="n">ma</span><span class="o">.</span><span class="n">set_calculator</span><span class="p">(</span><span class="n">calculator</span><span class="p">)</span>
+<span class="c1"># def neb_graph(image,calculator=None):</span>
+<span class="c1">#     if calculator:</span>
+<span class="c1">#         ma.set_calculator(calculator)</span>
+
+<span class="k">def</span> <span class="nf">make_connections</span><span class="p">(</span><span class="n">eq_list</span><span class="p">,</span><span class="n">target</span><span class="p">:</span><span class="nb">list</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;EQ構造のAtomsリストから反応しそうなCONNECTIONを返す</span>
+<span class="sd">    </span>
+<span class="sd">    Parameter:</span>
+<span class="sd">    </span>
+<span class="sd">    eq_list: list of Atoms</span>
+<span class="sd">        EQ構造のAtomsリスト</span>
+<span class="sd">    n:</span>
+<span class="sd">        nを大きくするとより多くのCONNECTIONを返す(その分反応しづらいCONNECTIONが含まれる) </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">eq_list</span><span class="o">=</span> <span class="n">_extract_target_atoms</span><span class="p">(</span><span class="n">eq_list</span><span class="p">,</span><span class="n">target</span><span class="p">)</span> <span class="c1"># targetに指定した原子のみを抽出する</span>
+    <span class="n">similes</span> <span class="o">=</span> <span class="n">ma</span><span class="o">.</span><span class="n">get_smiles</span><span class="p">(</span><span class="n">eq_list</span><span class="p">)</span>
+    <span class="n">group</span><span class="p">,</span> <span class="n">bond_dict</span> <span class="o">=</span> <span class="n">_atoms_matrix_dict</span><span class="p">(</span><span class="n">eq_list</span><span class="p">)</span>
+    <span class="n">conv</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">a_key</span><span class="p">,</span><span class="n">a_mat</span><span class="p">),(</span><span class="n">b_key</span><span class="p">,</span><span class="n">b_mat</span><span class="p">)</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">bond_dict</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="n">dif</span> <span class="o">=</span> <span class="p">(</span><span class="n">a_mat</span><span class="o">-</span><span class="n">b_mat</span><span class="p">)</span><span class="o">.</span><span class="n">data</span> <span class="c1"># 構造Aと構造Bの結合の差を計算</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">dif</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">dif</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;反応しそうな組み合わせ&quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">similes</span><span class="p">[</span><span class="n">group</span><span class="p">[</span><span class="n">a_key</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">similes</span><span class="p">[</span><span class="n">group</span><span class="p">[</span><span class="n">b_key</span><span class="p">][</span><span class="mi">0</span><span class="p">]]:</span>
+                <span class="sd">&quot;&quot;&quot;SMILES的に違う構造の時&quot;&quot;&quot;</span>
+                <span class="n">min_distance_conbination</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">distance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">ini</span><span class="p">,</span><span class="n">fin</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="n">a_key</span><span class="p">],</span> <span class="n">group</span><span class="p">[</span><span class="n">b_key</span><span class="p">]):</span>
+                    <span class="sd">&quot;&quot;&quot;最も動く距離の短いものを算出&quot;&quot;&quot;</span>
+                    <span class="n">ini_structure</span> <span class="o">=</span> <span class="n">eq_list</span><span class="p">[</span><span class="n">ini</span><span class="p">]</span>
+                    <span class="n">fin_structure</span> <span class="o">=</span> <span class="n">eq_list</span><span class="p">[</span><span class="n">fin</span><span class="p">]</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">ini_structure</span><span class="p">,</span> <span class="n">fin_structure</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">d</span> <span class="o">&lt;</span> <span class="n">distance</span><span class="p">:</span>
+                        <span class="n">distance</span> <span class="o">=</span> <span class="n">d</span>
+                        <span class="n">min_distance_conbination</span> <span class="o">=</span> <span class="p">(</span><span class="n">ini</span><span class="p">,</span><span class="n">fin</span><span class="p">)</span>
+                <span class="n">conv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">min_distance_conbination</span><span class="p">)</span>   
+    <span class="k">return</span> <span class="n">conv</span>
+
+    
+<span class="k">def</span> <span class="nf">_atoms_matrix_dict</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ユニークなbondの行列を作成する</span>
+<span class="sd">    </span>
+<span class="sd">    bond_dict = {hashableな行列:adjacency_matrix}</span>
+<span class="sd">    group = {hashableな行列:[idx]}</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">group</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">bond_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">):</span>
+        <span class="n">ana</span> <span class="o">=</span> <span class="n">Analysis</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="n">bond_mat</span> <span class="o">=</span> <span class="n">ana</span><span class="o">.</span><span class="n">adjacency_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">hashable_mat</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bond_mat</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">hashable_mat</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">bond_dict</span><span class="p">[</span><span class="n">hashable_mat</span><span class="p">]</span> <span class="o">=</span> <span class="n">bond_mat</span>
+            <span class="n">group</span><span class="p">[</span><span class="n">hashable_mat</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">group</span><span class="p">[</span><span class="n">hashable_mat</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">group</span><span class="p">,</span> <span class="n">bond_dict</span>
+
+<span class="k">def</span> <span class="nf">_extract_target_atoms</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">,</span><span class="n">target</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;targetに指定した原子のみを抽出する&quot;&quot;&quot;</span>
+    <span class="n">atoms_list</span> <span class="o">=</span> <span class="n">ma</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">)</span>
+    <span class="n">atoms_n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">del_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">atoms_n</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">target</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="n">atoms_list</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">atoms</span> <span class="p">[</span><span class="n">del_idx</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">atoms_list</span>
         
+    
 </pre></div>
 
            </div>

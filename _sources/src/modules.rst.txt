@@ -10,5 +10,6 @@ Modules
    modules/atomslist
    modules/grrmdata
    modules/visualize
+   modules/geometries
    modules/formats
    modules/log
