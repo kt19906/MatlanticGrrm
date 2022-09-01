@@ -12,8 +12,63 @@ GRRMのデータをインポートする
 - PT
 - GrrmData
 
-``log2atoms`` は最も簡単にGRRMの\*_list.logからAtomsリストを作成できる方法である.
-一方 ``GrrmData`` は扱いが少し複雑であるが,Atomsリストの取得だけでなく,CONNECTIONの取得やデータのマージ,
-FixAtomsのみを取得できるなど高機能なクラスである.
+| 基本的には ``log2atoms`` , ``get_connections`` を使えば必要なデータはインポートできる
+| データのマージ等の操作を行ないたい時は ``GrrmData`` を用いる.
 
 
+log2atoms
+-----------
+
+| ``log2atoms`` はGRRMのlogファイルからase.Atomsのリストを作成する関数である.
+| 第二引数にcomファイルを設定する事でFrozenAtomと共に読み込むことができる
+
+.. code-block:: python
+
+    from matlanticgrrm.grrmdata import log2atoms
+
+    atoms_list = log2atoms("bareCo_EQ_list.log","bareCo.com")
+
+    >>> atoms_list
+    >>> [Atoms(symbols='CH92Al2CoO187Si112', pbc=False),
+    >>>  Atoms(symbols='CH92Al2CoO187Si112', pbc=False),
+    >>>  Atoms(symbols='CH92Al2CoO187Si112', pbc=False),
+    >>>  Atoms(symbols='CH92Al2CoO187Si112', pbc=False),
+    >>>  ...
+    >>>  ...]
+
+| 周期境界条件の場合,poscarの引数にGRRMの計算で使用したPOSCARファイルを指定する.
+| pbcとcellが自動で設定される.
+
+.. code-block:: python
+
+    from matlanticgrrm.grrmdata import log2atoms
+
+    atoms_list = log2atoms("bareCo_EQ_list.log","bareCo.com",poscar="POSCAR")
+
+    >>> atoms_list
+    >>> [Atoms(symbols='CH4Al2CoO131Si62', pbc=True, cell=[12.632, 12.632, 26.186]),
+    >>>  Atoms(symbols='CH4Al2CoO131Si62', pbc=True, cell=[12.632, 12.632, 26.186]),
+    >>>  Atoms(symbols='CH4Al2CoO131Si62', pbc=True, cell=[12.632, 12.632, 26.186]),
+    >>>  Atoms(symbols='CH4Al2CoO131Si62', pbc=True, cell=[12.632, 12.632, 26.186]),
+    >>>  ...
+    >>>  ...]
+
+
+get_connections
+-----------------
+
+``get_connections`` はGRRMのCONNECTIONの情報を読み取る
+
+.. code-block:: python
+
+    from matlanticgrrm.grrmdata import get_connections
+
+    connections = get_connections("bareCo_TS_list.log")
+
+    >>> connections
+    >>> [(1, 2),
+    >>>  (2, 2),
+    >>>  (8, 9),
+    >>>  (1, 13),
+    >>>  ...
+    >>>  ...]

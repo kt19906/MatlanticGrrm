@@ -44,7 +44,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../quick_start.html">クイックスタート</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../tutorial.html">チュートリアル</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">GRRMのデータをインポートする</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">GRRMのデータをインポートする</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#log2atoms">log2atoms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-connections">get_connections</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../tips.html">Tips</a></li>
@@ -116,9 +120,64 @@
 <li><p>PT</p></li>
 <li><p>GrrmData</p></li>
 </ul>
-<p><code class="docutils literal notranslate"><span class="pre">log2atoms</span></code> は最も簡単にGRRMの*_list.logからAtomsリストを作成できる方法である.
-一方 <code class="docutils literal notranslate"><span class="pre">GrrmData</span></code> は扱いが少し複雑であるが,Atomsリストの取得だけでなく,CONNECTIONの取得やデータのマージ,
-FixAtomsのみを取得できるなど高機能なクラスである.</p>
+<div class="line-block">
+<div class="line">基本的には <code class="docutils literal notranslate"><span class="pre">log2atoms</span></code> , <code class="docutils literal notranslate"><span class="pre">get_connections</span></code> を使えば必要なデータはインポートできる</div>
+<div class="line">データのマージ等の操作を行ないたい時は <code class="docutils literal notranslate"><span class="pre">GrrmData</span></code> を用いる.</div>
+</div>
+<section id="log2atoms">
+<h2>log2atoms<a class="headerlink" href="#log2atoms" title="この見出しへのパーマリンク"></a></h2>
+<div class="line-block">
+<div class="line"><code class="docutils literal notranslate"><span class="pre">log2atoms</span></code> はGRRMのlogファイルからase.Atomsのリストを作成する関数である.</div>
+<div class="line">第二引数にcomファイルを設定する事でFrozenAtomと共に読み込むことができる</div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matlanticgrrm.grrmdata</span> <span class="kn">import</span> <span class="n">log2atoms</span>
+
+<span class="n">atoms_list</span> <span class="o">=</span> <span class="n">log2atoms</span><span class="p">(</span><span class="s2">&quot;bareCo_EQ_list.log&quot;</span><span class="p">,</span><span class="s2">&quot;bareCo.com&quot;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">atoms_list</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">Atoms</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="s1">&#39;CH92Al2CoO187Si112&#39;</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="n">Atoms</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="s1">&#39;CH92Al2CoO187Si112&#39;</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="n">Atoms</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="s1">&#39;CH92Al2CoO187Si112&#39;</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="n">Atoms</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="s1">&#39;CH92Al2CoO187Si112&#39;</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">周期境界条件の場合,poscarの引数にGRRMの計算で使用したPOSCARファイルを指定する.</div>
+<div class="line">pbcとcellが自動で設定される.</div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matlanticgrrm.grrmdata</span> <span class="kn">import</span> <span class="n">log2atoms</span>
+
+<span class="n">atoms_list</span> <span class="o">=</span> <span class="n">log2atoms</span><span class="p">(</span><span class="s2">&quot;bareCo_EQ_list.log&quot;</span><span class="p">,</span><span class="s2">&quot;bareCo.com&quot;</span><span class="p">,</span><span class="n">poscar</span><span class="o">=</span><span class="s2">&quot;POSCAR&quot;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">atoms_list</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">Atoms</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="s1">&#39;CH4Al2CoO131Si62&#39;</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="p">[</span><span class="mf">12.632</span><span class="p">,</span> <span class="mf">12.632</span><span class="p">,</span> <span class="mf">26.186</span><span class="p">]),</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="n">Atoms</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="s1">&#39;CH4Al2CoO131Si62&#39;</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="p">[</span><span class="mf">12.632</span><span class="p">,</span> <span class="mf">12.632</span><span class="p">,</span> <span class="mf">26.186</span><span class="p">]),</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="n">Atoms</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="s1">&#39;CH4Al2CoO131Si62&#39;</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="p">[</span><span class="mf">12.632</span><span class="p">,</span> <span class="mf">12.632</span><span class="p">,</span> <span class="mf">26.186</span><span class="p">]),</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="n">Atoms</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="s1">&#39;CH4Al2CoO131Si62&#39;</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="p">[</span><span class="mf">12.632</span><span class="p">,</span> <span class="mf">12.632</span><span class="p">,</span> <span class="mf">26.186</span><span class="p">]),</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="get-connections">
+<h2>get_connections<a class="headerlink" href="#get-connections" title="この見出しへのパーマリンク"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">get_connections</span></code> はGRRMのCONNECTIONの情報を読み取る</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matlanticgrrm.grrmdata</span> <span class="kn">import</span> <span class="n">get_connections</span>
+
+<span class="n">connections</span> <span class="o">=</span> <span class="n">get_connections</span><span class="p">(</span><span class="s2">&quot;bareCo_TS_list.log&quot;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">connections</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span>  <span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
