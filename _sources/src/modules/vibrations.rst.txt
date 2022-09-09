@@ -4,7 +4,7 @@
 
 .. module:: matlanticgrrm.vibrations
 
-ListVibrations クラス
+ListVibrations クラス 
 =====================
 .. autoclass:: matlanticgrrm.vibrations.ListVibrations
    :members: run, summary, write_mode
